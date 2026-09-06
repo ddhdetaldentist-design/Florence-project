@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #DFB163;
+  --secondary: #252531;
+  --dark: #141419;
+}
+
+body {
+  color: #E2E8F0;
+  background-color: #121217;
+  font-family: 'Cairo', 'Montserrat', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #181820;
+}
+::-webkit-scrollbar-thumb {
+  background: #DFB163;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c5984a;
+}
+
+/* Luxury gold glow and borders */
+.gold-gradient {
+  background: linear-gradient(135deg, #DFB163 0%, #edd39a 50%, #DFB163 100%);
+}
+
+.gold-text-gradient {
+  background: linear-gradient(135deg, #DFB163 0%, #FFF3D6 50%, #C5984A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border {
+  border-color: rgba(223, 177, 99, 0.3);
+}
+
+.gold-border-glow:hover {
+  border-color: rgba(223, 177, 99, 0.8);
+  box-shadow: 0 0 20px rgba(223, 177, 99, 0.2);
+}
+
+.glass-panel {
+  background: rgba(37, 37, 49, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(223, 177, 99, 0.15);
+}
