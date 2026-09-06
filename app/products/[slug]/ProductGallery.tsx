@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 
 interface ProductGalleryProps {
   images: string[];
@@ -12,37 +11,44 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
   const [activeImage, setActiveImage] = useState<string>(images[0] || '/img/1.jpg');
 
   return (
-    <div className="space-y-4">
+    <div className="mb-4">
       {/* Main Showcase Image */}
-      <div className="relative h-[380px] sm:h-[480px] w-full rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
-        <Image
+      <div
+        className="w-100 overflow-hidden mb-3 border bg-light shadow-sm"
+        style={{ height: '440px' }}
+      >
+        <img
           src={activeImage}
           alt={title}
-          fill
-          priority
-          className="object-cover transition-all duration-300"
+          className="img-fluid w-100 h-100"
+          style={{ objectFit: 'cover' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Thumbnails Row */}
       {images.length > 1 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+        <div className="d-flex align-items-center gap-2 overflow-auto pb-2">
           {images.map((img, idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => setActiveImage(img)}
-              className={`relative h-20 w-24 sm:h-24 sm:w-28 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
-                activeImage === img
-                  ? 'border-primary shadow-lg shadow-primary/20 scale-105'
-                  : 'border-zinc-800 hover:border-zinc-600 opacity-70 hover:opacity-100'
-              }`}
+              className="btn p-0 border mr-2"
+              style={{
+                width: '90px',
+                height: '70px',
+                overflow: 'hidden',
+                borderColor: activeImage === img ? '#DFB163' : '#dee2e6',
+                borderWidth: activeImage === img ? '2px' : '1px',
+                borderRadius: '0',
+                opacity: activeImage === img ? 1 : 0.7,
+              }}
             >
-              <Image
+              <img
                 src={img}
-                alt={`${title} - صورة ${idx + 1}`}
-                fill
-                className="object-cover"
+                alt={`${title} - ${idx + 1}`}
+                className="w-100 h-100"
+                style={{ objectFit: 'cover' }}
               />
             </button>
           ))}

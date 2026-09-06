@@ -1,25 +1,10 @@
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import ProductCard from '@/components/ProductCard';
 import { getProductBySlug, getProducts } from '@/lib/products-service';
 import ProductGallery from './ProductGallery';
-import { 
-  ShieldCheck, 
-  Ruler, 
-  MapPin, 
-  CheckCircle2, 
-  MessageCircle, 
-  PhoneCall, 
-  ArrowRight, 
-  Layers, 
-  Calendar, 
-  Sparkles,
-  Share2
-} from 'lucide-react';
 
 interface Props {
   params: {
@@ -38,132 +23,114 @@ export default async function ProductDetailPage({ params }: Props) {
   const allInCat = await getProducts({ category: product.category, status: 'published' });
   const relatedProducts = allInCat.filter((p) => p.id !== product.id).slice(0, 3);
 
-  const imagesList = product.images && product.images.length > 0 
-    ? product.images 
-    : [product.thumbnail || '/img/1.jpg'];
+  const imagesList =
+    product.images && product.images.length > 0
+      ? product.images
+      : [product.thumbnail || '/img/1.jpg'];
 
   const whatsappMessage = encodeURIComponent(
-    `مرحباً فلورنس للمطابخ، أريد الاستفسار عن تفاصيل وسعر تصميم: "${product.title}"`
+    `Hello Florence Kitchen, I would like to inquire about details and pricing for design: "${product.title}"`
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#121217]">
+    <div className="bg-white min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Breadcrumb Header */}
-      <div className="bg-[#181822] border-b border-zinc-800 py-4 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <nav className="flex items-center gap-2 text-xs sm:text-sm text-zinc-400">
-            <Link href="/" className="hover:text-primary transition-colors">
-              الرئيسية
-            </Link>
-            <span className="text-zinc-600">/</span>
-            <Link href="/products" className="hover:text-primary transition-colors">
-              المنتجات والمشاريع
-            </Link>
-            <span className="text-zinc-600">/</span>
-            <span className="text-primary font-medium truncate max-w-[200px] sm:max-w-xs">
-              {product.title}
-            </span>
-          </nav>
-
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-          >
-            <ArrowRight className="w-3.5 h-3.5" />
-            <span>العودة للكتالوج</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Details Section */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Gallery Column (7 cols) */}
-          <div className="lg:col-span-7">
-            <ProductGallery images={imagesList} title={product.title} />
-          </div>
-
-          {/* Details & Action Column (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between">
-            <div className="space-y-6">
-              {/* Badges */}
-              <div className="flex items-center gap-2">
-                <span className="bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-3 py-1 rounded-full">
-                  {product.category}
-                </span>
-                {product.featured && (
-                  <span className="bg-zinc-800 text-amber-300 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    <span>مشروع مميز</span>
-                  </span>
-                )}
-                <span className="text-zinc-500 text-xs flex items-center gap-1 mr-auto">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{new Date(product.created_at).toLocaleDateString('ar-EG')}</span>
-                </span>
-              </div>
-
-              {/* Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug">
+      {/* Page Header Start */}
+      <div className="container-fluid bg-secondary py-5">
+        <div className="container py-5">
+          <div className="row align-items-center py-4">
+            <div className="col-md-8 text-center text-md-left">
+              <h1 className="mb-4 mb-md-0 text-primary text-uppercase font-weight-bold">
                 {product.title}
               </h1>
-
-              {/* Description */}
-              <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line bg-[#181822]/60 p-5 rounded-2xl border border-zinc-800/80">
-                {product.description}
+            </div>
+            <div className="col-md-4 text-center text-md-right">
+              <div className="d-inline-flex align-items-center">
+                <Link className="btn btn-outline-primary" href="/" style={{ borderRadius: '0' }}>
+                  Home
+                </Link>
+                <i className="fas fa-angle-double-right text-primary mx-2"></i>
+                <Link
+                  className="btn btn-outline-primary"
+                  href="/products"
+                  style={{ borderRadius: '0' }}
+                >
+                  Projects
+                </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Page Header End */}
 
-              {/* Technical Specifications */}
-              {product.specs && Object.keys(product.specs).length > 0 && (
-                <div className="bg-[#181822] rounded-2xl p-5 border border-zinc-800 space-y-3">
-                  <h3 className="text-white font-bold text-sm flex items-center gap-2 pb-2 border-b border-zinc-800">
-                    <Layers className="w-4 h-4 text-primary" />
-                    <span>المواصفات الفنية والتفاصيل</span>
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 gap-2.5 text-xs">
+      {/* Detail Content Start */}
+      <main className="container py-5 flex-grow">
+        <div className="row pt-4">
+          {/* Main Column */}
+          <div className="col-lg-8">
+            <div className="d-flex flex-column text-left mb-4">
+              <span className="text-primary font-weight-bold text-uppercase mb-2">
+                {product.category === 'kitchens'
+                  ? 'Kitchen Design'
+                  : product.category === 'dressing'
+                  ? 'Dressing Room'
+                  : 'Interior Furniture'}
+              </span>
+              <h1 className="mb-4 section-title font-weight-bold">{product.title}</h1>
+              <div className="d-flex flex-wrap align-items-center text-muted mb-3" style={{ gap: '15px' }}>
+                <span>
+                  <i className="fa fa-shield-alt text-primary mr-1"></i> 10-Year Certified Warranty
+                </span>
+                <span>
+                  <i className="fa fa-map-marker-alt text-primary mr-1"></i> Obour City
+                </span>
+                <span>
+                  <i className="fa fa-check-circle text-primary mr-1"></i> 100% European Materials
+                </span>
+              </div>
+            </div>
+
+            {/* Gallery */}
+            <ProductGallery images={imagesList} title={product.title} />
+
+            {/* Description */}
+            <div className="mb-5">
+              <h4 className="font-weight-bold mb-3">Project Description & Specifications:</h4>
+              <p className="lead" style={{ lineHeight: '1.9', color: '#555' }}>
+                {product.description}
+              </p>
+
+              {/* Specs Table */}
+              {product.specs && (
+                <div className="mt-4 border bg-light p-4">
+                  <h5 className="font-weight-bold text-secondary mb-3">
+                    <i className="fa fa-list-alt text-primary mr-2"></i> Technical Specifications
+                  </h5>
+                  <div className="row">
                     {product.specs.material && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">الخامة الرئيسية:</span>
-                        <span className="text-white font-semibold">{product.specs.material}</span>
+                      <div className="col-sm-6 mb-3">
+                        <strong className="d-block text-secondary">Materials:</strong>
+                        <span className="text-muted">{product.specs.material}</span>
                       </div>
                     )}
                     {product.specs.accessories && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">المفصلات والإكسسوار:</span>
-                        <span className="text-white font-semibold">{product.specs.accessories}</span>
-                      </div>
-                    )}
-                    {product.specs.countertop && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">القرصة / السطح:</span>
-                        <span className="text-white font-semibold">{product.specs.countertop}</span>
-                      </div>
-                    )}
-                    {product.specs.lighting && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">نظام الإضاءة:</span>
-                        <span className="text-white font-semibold">{product.specs.lighting}</span>
-                      </div>
-                    )}
-                    {product.specs.color && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">اللون والتشطيب:</span>
-                        <span className="text-white font-semibold">{product.specs.color}</span>
-                      </div>
-                    )}
-                    {product.specs.location && (
-                      <div className="flex justify-between py-1 border-b border-zinc-800/50">
-                        <span className="text-zinc-400">موقع التنفيذ:</span>
-                        <span className="text-white font-semibold">{product.specs.location}</span>
+                      <div className="col-sm-6 mb-3">
+                        <strong className="d-block text-secondary">Fittings & Movement:</strong>
+                        <span className="text-muted">{product.specs.accessories}</span>
                       </div>
                     )}
                     {product.specs.warranty && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-zinc-400">فترة الضمان:</span>
-                        <span className="text-primary font-bold">{product.specs.warranty}</span>
+                      <div className="col-sm-6 mb-3">
+                        <strong className="d-block text-secondary">Warranty:</strong>
+                        <span className="text-muted">{product.specs.warranty}</span>
+                      </div>
+                    )}
+                    {product.specs.color && (
+                      <div className="col-sm-6 mb-3">
+                        <strong className="d-block text-secondary">Color & Finish:</strong>
+                        <span className="text-muted">{product.specs.color}</span>
                       </div>
                     )}
                   </div>
@@ -171,46 +138,92 @@ export default async function ProductDetailPage({ params }: Props) {
               )}
             </div>
 
-            {/* Inquiries & CTAs */}
-            <div className="pt-6 space-y-3">
+            {/* WhatsApp Booking CTA */}
+            <div className="p-4 bg-secondary text-white mb-5 d-flex flex-column flex-md-row align-items-center justify-content-between">
+              <div>
+                <h4 className="text-primary font-weight-bold mb-1">
+                  Interested in this design for your space?
+                </h4>
+                <p className="m-0 text-white-50">
+                  Contact us for free site measurements and custom 3D design rendering.
+                </p>
+              </div>
               <a
                 href={`https://wa.me/201065772456?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+                className="btn btn-primary font-weight-bold px-4 py-3 mt-3 mt-md-0 d-inline-flex align-items-center text-nowrap"
+                style={{ borderRadius: '0' }}
               >
-                <MessageCircle className="w-5 h-5 fill-white" />
-                <span>طلب معاينة واستفسار عبر الواتساب</span>
+                <i className="fab fa-whatsapp mr-2 text-dark font-weight-bold" style={{ fontSize: '18px' }}></i>
+                Inquire & Book Consultation
               </a>
-
-              <a
-                href="tel:01065772456"
-                className="w-full py-3.5 rounded-xl bg-[#181822] hover:bg-zinc-800 text-white font-bold text-sm border border-zinc-700 flex items-center justify-center gap-2 transition-colors"
-              >
-                <PhoneCall className="w-4 h-4 text-primary" />
-                <span>اتصال هاتفي مباشر: 0106 577 2456</span>
-              </a>
-
-              <p className="text-center text-xs text-zinc-500 pt-1">
-                معاينة مجانية داخل القاهرة والجيزة وتصميم 3D لمطبخك قبل البدء
-              </p>
             </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="col-lg-4 mt-5 mt-lg-0">
+            {/* Direct Contact Card */}
+            <div className="bg-light p-4 mb-4 border">
+              <h5 className="text-secondary font-weight-bold mb-3">
+                <i className="fa fa-phone-alt text-primary mr-2"></i> Direct Management Contact
+              </h5>
+              <p className="text-muted small mb-3">
+                Eng. Mohamed Atef and our engineering team are available to answer your technical questions and organize your consultation.
+              </p>
+              <div className="mb-2">
+                <strong>Phone: </strong>
+                <a href="tel:01065772456" className="text-primary font-weight-bold">
+                  0106 577 2456
+                </a>
+              </div>
+              <div className="mb-3">
+                <strong>Showroom: </strong>
+                <span className="text-muted">Obour City - 9th District - Qatar Al Nada St.</span>
+              </div>
+              <a
+                href={`https://wa.me/201065772456?text=${whatsappMessage}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary btn-block font-weight-bold py-2 text-dark"
+                style={{ borderRadius: '0' }}
+              >
+                <i className="fab fa-whatsapp mr-1"></i> WhatsApp Message
+              </a>
+            </div>
+
+            {/* Related Projects */}
+            {relatedProducts.length > 0 && (
+              <div className="border bg-white p-4">
+                <h5 className="text-secondary font-weight-bold mb-4 border-bottom pb-2">
+                  Related Projects
+                </h5>
+                {relatedProducts.map((rel) => (
+                  <div key={rel.id} className="d-flex mb-3 align-items-center">
+                    <img
+                      src={rel.thumbnail || rel.images?.[0] || '/img/1.jpg'}
+                      alt={rel.title}
+                      style={{ width: '75px', height: '65px', objectFit: 'cover' }}
+                      className="mr-3 border"
+                    />
+                    <div>
+                      <Link
+                        href={`/products/${rel.slug}`}
+                        className="text-dark font-weight-bold d-block small"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        {rel.title}
+                      </Link>
+                      <span className="text-primary small font-weight-bold">
+                        {rel.specs?.warranty || '10-Year Warranty'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Related Works */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-20 pt-12 border-t border-zinc-800">
-            <h2 className="text-2xl font-bold text-white mb-8">
-              أعمال ومشاريع مشابهة قد تهمك
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {relatedProducts.map((rel) => (
-                <ProductCard key={rel.id} product={rel} />
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       <Footer />

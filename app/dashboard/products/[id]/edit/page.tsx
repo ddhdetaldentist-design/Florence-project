@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getProductById, updateProduct, uploadProductImage } from '@/lib/products-service';
 import { ProductFormData } from '@/types';
-import { generateSlug } from '@/lib/utils';
 import { 
-  ArrowRight, 
+  ArrowLeft, 
   Upload, 
   X, 
   Sparkles, 
@@ -18,14 +17,10 @@ import {
   ImagePlus
 } from 'lucide-react';
 
-interface Props {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditProductPage({ params }: Props) {
+export default function EditProductPage() {
   const router = useRouter();
+  const params = useParams();
+  const productId = params.id as string;
 
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
@@ -53,36 +48,37 @@ export default function EditProductPage({ params }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadProduct() {
+    async function load() {
+      if (!productId) return;
       setLoading(true);
-      const prod = await getProductById(params.id);
-      if (prod) {
-        setTitle(prod.title);
-        setSlug(prod.slug);
-        setCategory(prod.category);
-        setDescription(prod.description);
-        setPrice(prod.price ? prod.price.toString() : '');
-        setFeatured(prod.featured);
-        setStatus(prod.status);
-        setImages(prod.images || [prod.thumbnail]);
-        setThumbnail(prod.thumbnail);
+      const product = await getProductById(productId);
+      if (product) {
+        setTitle(product.title);
+        setSlug(product.slug);
+        setCategory(product.category);
+        setDescription(product.description);
+        setPrice(product.price !== null && product.price !== undefined ? product.price.toString() : '');
+        setFeatured(product.featured);
+        setStatus(product.status);
+        setImages(product.images || []);
+        setThumbnail(product.thumbnail || product.images?.[0] || '');
 
-        if (prod.specs) {
-          setMaterial(prod.specs.material || '');
-          setAccessories(prod.specs.accessories || '');
-          setCountertop(prod.specs.countertop || '');
-          setLighting(prod.specs.lighting || '');
-          setWarranty(prod.specs.warranty || '');
-          setLocation(prod.specs.location || '');
-          setColor(prod.specs.color || '');
+        if (product.specs) {
+          setMaterial(product.specs.material || '');
+          setAccessories(product.specs.accessories || '');
+          setCountertop(product.specs.countertop || '');
+          setLighting(product.specs.lighting || '');
+          setWarranty(product.specs.warranty || '');
+          setLocation(product.specs.location || '');
+          setColor(product.specs.color || '');
         }
       } else {
-        setError('المنتج غير موجود');
+        setError('Project not found');
       }
       setLoading(false);
     }
-    loadProduct();
-  }, [params.id]);
+    load();
+  }, [productId]);
 
   // Handle uploading files
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,90 +95,93 @@ export default function EditProductPage({ params }: Props) {
       const res = await uploadProductImage(file);
       if (res.url) {
         newUrls.push(res.url);
-      } else if (res.error) {
-        setError('تعذر رفع بعض الصور: ' + res.error);
+      } else {
+        setError('Failed to upload image: ' + res.error);
       }
     }
 
-    if (newUrls.length > 0) {
-      setImages((prev) => [...prev, ...newUrls]);
-      if (!thumbnail) {
-        setThumbnail(newUrls[0]);
+    setImages((prev) => {
+      const updated = [...prev, ...newUrls];
+      if (!thumbnail && updated.length > 0) {
+        setThumbnail(updated[0]);
       }
-    }
+      return updated;
+    });
 
     setUploading(false);
   };
 
-  const removeImage = (urlToRemove: string) => {
-    const nextImages = images.filter((img) => img !== urlToRemove);
-    setImages(nextImages);
-    if (thumbnail === urlToRemove) {
-      setThumbnail(nextImages[0] || '');
-    }
+  const removeImage = (indexToRemove: number) => {
+    setImages((prev) => {
+      const removedUrl = prev[indexToRemove];
+      const updated = prev.filter((_, idx) => idx !== indexToRemove);
+      if (thumbnail === removedUrl) {
+        setThumbnail(updated[0] || '');
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!title.trim()) {
-      setError('يرجى كتابة عنوان أو اسم المنتج');
+      setError('Please enter a project title');
       return;
     }
 
-    const currentThumbnail = thumbnail || images[0] || '/img/1.jpg';
-    const currentImages = images.length > 0 ? images : [currentThumbnail];
+    setSaving(true);
+    setError(null);
 
-    const productPayload: Partial<ProductFormData> = {
-      title: title.trim(),
-      slug: slug.trim() || generateSlug(title),
+    const formData: Partial<ProductFormData> = {
+      title,
+      slug,
       category,
-      description: description.trim(),
-      thumbnail: currentThumbnail,
-      images: currentImages,
+      description,
       price: price ? parseFloat(price) : null,
       featured,
       status,
+      thumbnail: thumbnail || images[0] || '/img/1.jpg',
+      images: images.length > 0 ? images : ['/img/1.jpg'],
       specs: {
-        material: material.trim(),
-        accessories: accessories.trim(),
-        countertop: countertop.trim(),
-        lighting: lighting.trim(),
-        warranty: warranty.trim(),
-        location: location.trim(),
-        color: color.trim(),
+        material: material || undefined,
+        accessories: accessories || undefined,
+        countertop: countertop || undefined,
+        lighting: lighting || undefined,
+        warranty: warranty || undefined,
+        location: location || undefined,
+        color: color || undefined,
       },
     };
 
-    setSaving(true);
-    const res = await updateProduct(params.id, productPayload);
-    setSaving(false);
+    const res = await updateProduct(productId, formData);
 
     if (res.product) {
       router.push('/dashboard/products');
       router.refresh();
     } else {
-      setError(res.error || 'حدث خطأ أثناء حفظ التعديلات');
+      setError(res.error || 'Error occurred while saving changes');
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="text-center py-20 text-zinc-500 text-sm">
-        جاري تحميل بيانات المنتج...
+      <div className="p-12 text-center text-zinc-400 text-sm">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        Loading project data...
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
         <div>
-          <h1 className="text-2xl font-black text-white">تعديل المنتج / المشروع</h1>
+          <h1 className="text-2xl font-black text-white">Edit Project / Product</h1>
           <p className="text-xs text-zinc-400 mt-1">
-            تحديث تفاصيل وصور عمل &quot;{title}&quot;
+            Update specifications, images, and live status for &quot;{title}&quot;
           </p>
         </div>
 
@@ -190,8 +189,8 @@ export default function EditProductPage({ params }: Props) {
           href="/dashboard/products"
           className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
         >
-          <ArrowRight className="w-4 h-4" />
-          <span>رجوع للمنتجات</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Products</span>
         </Link>
       </div>
 
@@ -207,34 +206,35 @@ export default function EditProductPage({ params }: Props) {
         <div className="bg-[#181822] p-6 rounded-2xl border border-zinc-800 space-y-4">
           <h2 className="text-sm font-bold text-white flex items-center gap-2 pb-2 border-b border-zinc-800">
             <Layers className="w-4 h-4 text-primary" />
-            <span>المعلومات الأساسية للمنتج</span>
+            <span>Basic Information</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                اسم المنتج / العمل *
+                Project Title *
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Modern Acrylic Kitchen - Matte Grey"
                 className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                رابط الـ URL (Slug)
+                URL Slug
               </label>
               <input
                 type="text"
                 required
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
+                placeholder="modern-acrylic-kitchen"
                 className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-zinc-300 text-xs rounded-xl p-3 outline-none"
-                dir="ltr"
               />
             </div>
           </div>
@@ -242,32 +242,32 @@ export default function EditProductPage({ params }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                التصنيف *
+                Category *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
               >
-                <option value="kitchens">مطابخ مودرن وكلاسيك</option>
-                <option value="dressing-rooms">غرف ملابس (Dressing Rooms)</option>
-                <option value="living-rooms">وحدات تلفزيون وغرف معيشة</option>
-                <option value="bedrooms">غرف نوم</option>
-                <option value="furniture">أثاث مخصص</option>
+                <option value="kitchens">Modern & Classic Kitchens</option>
+                <option value="dressing-rooms">Dressing Rooms</option>
+                <option value="living-rooms">Living & TV Units</option>
+                <option value="bedrooms">Bedrooms</option>
+                <option value="furniture">Bespoke Furniture</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                حالة النشر
+                Publication Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
                 className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
               >
-                <option value="published">منشور في الموقع الآن</option>
-                <option value="draft">حفظ كمسودة فقط</option>
+                <option value="published">Published Live</option>
+                <option value="draft">Save as Draft</option>
               </select>
             </div>
 
@@ -279,18 +279,18 @@ export default function EditProductPage({ params }: Props) {
                   onChange={(e) => setFeatured(e.target.checked)}
                   className="w-4 h-4 rounded text-primary focus:ring-primary accent-primary"
                 />
-                <span>عرض في الصفحة الرئيسية (عمل مميز)</span>
+                <span>Show on Homepage (Featured)</span>
               </label>
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-              الوصف والشرح التفصيلي *
+              Description & Craftsmanship Details *
             </label>
             <textarea
-              rows={4}
               required
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none leading-relaxed"
@@ -298,67 +298,69 @@ export default function EditProductPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Section 2: Photo Uploader */}
+        {/* Section 2: Photo Uploads */}
         <div className="bg-[#181822] p-6 rounded-2xl border border-zinc-800 space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               <ImagePlus className="w-4 h-4 text-primary" />
-              <span>صور المنتج والمشروع</span>
+              <span>Project Photos & Showcase Gallery</span>
             </h2>
-            <span className="text-xs text-zinc-400">{images.length} صور</span>
+            <span className="text-xs text-zinc-400">{images.length} photos</span>
           </div>
 
-          {/* Upload Dropzone */}
-          <div className="border-2 border-dashed border-zinc-700 hover:border-primary rounded-2xl p-6 text-center cursor-pointer transition-colors relative bg-[#121217]/50">
+          {/* Upload Area */}
+          <label className="border-2 border-dashed border-zinc-700 hover:border-primary rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors bg-[#121217]/50 group">
             <input
               type="file"
               multiple
               accept="image/*"
               onChange={handleFileUpload}
+              className="hidden"
               disabled={uploading}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            <div className="space-y-2">
-              <Upload className="w-8 h-8 text-primary mx-auto" />
-              <p className="text-sm font-bold text-white">
-                {uploading ? 'جاري رفع الصور إلى Supabase Storage...' : 'إضافة أو رفع صور جديدة للمشروع'}
-              </p>
-              <p className="text-xs text-zinc-500">يدعم JPG, PNG, WEBP</p>
+            <div className="w-12 h-12 rounded-full bg-zinc-800 group-hover:bg-primary/20 text-zinc-400 group-hover:text-primary flex items-center justify-center transition-colors mb-3">
+              <Upload className="w-5 h-5" />
             </div>
-          </div>
+            <p className="text-xs font-semibold text-zinc-300">
+              {uploading ? 'Uploading images...' : 'Click or drop photos here'}
+            </p>
+            <p className="text-xs text-zinc-500">Supports JPG, PNG, WEBP</p>
+          </label>
 
-          {/* Uploaded Images Preview Grid */}
+          {/* Image Previews */}
           {images.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-2">
               {images.map((img, idx) => (
                 <div
                   key={idx}
-                  className={`relative h-28 rounded-xl overflow-hidden border-2 bg-zinc-900 group ${
+                  className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-zinc-900 ${
                     thumbnail === img ? 'border-primary' : 'border-zinc-800'
                   }`}
                 >
-                  <Image src={img} alt={`صورة ${idx + 1}`} fill className="object-cover" />
-                  
-                  <button
-                    type="button"
-                    onClick={() => removeImage(img)}
-                    className="absolute top-1.5 left-1.5 p-1 bg-red-600/90 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="حذف الصورة"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setThumbnail(img)}
-                    className={`absolute bottom-1.5 right-1.5 text-[10px] px-2 py-0.5 rounded font-bold ${
-                      thumbnail === img
-                        ? 'bg-primary text-zinc-950'
-                        : 'bg-black/70 text-zinc-300 opacity-0 group-hover:opacity-100'
-                    }`}
-                  >
-                    {thumbnail === img ? 'الرئيسية' : 'تعيين كرئيسية'}
-                  </button>
+                  <Image src={img} alt={`Preview ${idx + 1}`} fill className="object-cover" />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="p-1.5 rounded-lg bg-red-600/80 text-white hover:bg-red-500"
+                      title="Remove"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setThumbnail(img)}
+                      className="p-1.5 rounded-lg bg-zinc-800 text-xs font-bold text-white hover:bg-zinc-700"
+                      title="Set as Main Cover"
+                    >
+                      ★
+                    </button>
+                  </div>
+                  {thumbnail === img && (
+                    <span className="absolute bottom-1 left-1 bg-primary text-zinc-950 text-[10px] font-black px-1.5 py-0.5 rounded">
+                      Cover
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -369,100 +371,105 @@ export default function EditProductPage({ params }: Props) {
         <div className="bg-[#181822] p-6 rounded-2xl border border-zinc-800 space-y-4">
           <h2 className="text-sm font-bold text-white flex items-center gap-2 pb-2 border-b border-zinc-800">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>المواصفات الفنية وخامات التنفيذ</span>
+            <span>Technical Specifications</span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                الخامة الرئيسية
+                Primary Material
               </label>
               <input
                 type="text"
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. High-Gloss Turkish Acrylic"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                المفصلات والإكسسوارات
+                Fittings & Movement Hardware
               </label>
               <input
                 type="text"
                 value={accessories}
                 onChange={(e) => setAccessories(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. Austrian Blum Soft-Close"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                السطح / القرصة
+                Countertop / Top Surface
               </label>
               <input
                 type="text"
                 value={countertop}
                 onChange={(e) => setCountertop(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. Carrara Natural Marble"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                نظام الإضاءة
+                Lighting System
               </label>
               <input
                 type="text"
                 value={lighting}
                 onChange={(e) => setLighting(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. Motion Sensor Profile LED"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                الألوان والتشطيب
+                Color & Finish
               </label>
               <input
                 type="text"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. Royal White & Natural Oak"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                مدة الضمان
+                Warranty Period
               </label>
               <input
                 type="text"
                 value={warranty}
                 onChange={(e) => setWarranty(e.target.value)}
-                className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white text-xs rounded-xl p-3 outline-none"
+                placeholder="e.g. 10-Year Certified Warranty"
+                className="w-full bg-[#121217] border border-zinc-700 text-white text-xs rounded-xl p-3 outline-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-4 pt-4">
+        {/* Submit Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4">
           <Link
             href="/dashboard/products"
-            className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold rounded-xl transition-colors"
+            className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
           >
-            إلغاء
+            Cancel
           </Link>
-
           <button
             type="submit"
-            disabled={saving || uploading}
-            className="px-8 py-3 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-zinc-950 text-xs font-black rounded-xl shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 flex items-center gap-2"
+            disabled={saving}
+            className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-zinc-950 font-bold text-xs shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
           >
             <Check className="w-4 h-4" />
-            <span>{saving ? 'جاري حفظ التعديلات...' : 'حفظ التعديلات'}</span>
+            <span>{saving ? 'Saving Changes...' : 'Save Changes'}</span>
           </button>
         </div>
       </form>

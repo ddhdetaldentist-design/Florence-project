@@ -9,7 +9,7 @@ import {
   Clock, 
   Database, 
   PlusCircle, 
-  ArrowLeft, 
+  ArrowRight, 
   ExternalLink,
   Edit,
   Sparkles
@@ -29,10 +29,10 @@ export default async function DashboardOverviewPage() {
       <div className="bg-gradient-to-r from-[#1b1b26] to-[#14141c] p-6 rounded-3xl border border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white mb-1">
-            مرحباً بك في لوحة تحكم فلورنس كيتشن 👋
+            Welcome to Florence Kitchen Dashboard 👋
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400">
-            يمكنك من هنا إضافة المطابخ والدريسنج روم والمشاريع الجديدة وتحديث تفاصيلها وصورها في المتجر والمدونة.
+            Add, update, and manage your kitchens, dressing rooms, and bespoke projects in real time.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export default async function DashboardOverviewPage() {
           className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-hover text-zinc-950 font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg shrink-0 transition-transform hover:-translate-y-0.5"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>إضافة مشروع جديد</span>
+          <span>Add New Project</span>
         </Link>
       </div>
 
@@ -49,7 +49,7 @@ export default async function DashboardOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-[#181822] p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-400 font-medium">إجمالي المنتجات</p>
+            <p className="text-xs text-zinc-400 font-medium">Total Projects</p>
             <p className="text-3xl font-extrabold text-white mt-1">{products.length}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
@@ -59,7 +59,7 @@ export default async function DashboardOverviewPage() {
 
         <div className="bg-[#181822] p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-400 font-medium">المنتجات المنشورة</p>
+            <p className="text-xs text-zinc-400 font-medium">Published Items</p>
             <p className="text-3xl font-extrabold text-green-400 mt-1">{publishedCount}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center">
@@ -69,7 +69,7 @@ export default async function DashboardOverviewPage() {
 
         <div className="bg-[#181822] p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-400 font-medium">المسودات المؤقتة</p>
+            <p className="text-xs text-zinc-400 font-medium">Drafts</p>
             <p className="text-3xl font-extrabold text-amber-400 mt-1">{draftCount}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -79,10 +79,10 @@ export default async function DashboardOverviewPage() {
 
         <div className="bg-[#181822] p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-400 font-medium">حالة قاعدة البيانات</p>
+            <p className="text-xs text-zinc-400 font-medium">Database Status</p>
             <p className="text-sm font-bold text-white mt-2 flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-full ${isLiveSupabase ? 'bg-green-500 animate-pulse' : 'bg-amber-400'}`} />
-              <span>{isLiveSupabase ? 'Supabase متصل' : 'بيانات محلية جاهزة'}</span>
+              <span>{isLiveSupabase ? 'Supabase Connected' : 'Local Storage Mode'}</span>
             </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -96,14 +96,14 @@ export default async function DashboardOverviewPage() {
         <div className="p-6 border-b border-zinc-800/80 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold text-white">أحدث الأعمال المضافة</h2>
+            <h2 className="text-lg font-bold text-white">Recent Projects</h2>
           </div>
           <Link
             href="/dashboard/products"
             className="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
           >
-            <span>عرض وإدارة الكل</span>
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>View & Manage All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -128,10 +128,10 @@ export default async function DashboardOverviewPage() {
                     <span className="text-primary">{product.category}</span>
                     <span>•</span>
                     <span className={product.status === 'published' ? 'text-green-400' : 'text-amber-400'}>
-                      {product.status === 'published' ? 'منشور' : 'مسودة'}
+                      {product.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                     <span>•</span>
-                    <span>{new Date(product.created_at).toLocaleDateString('ar-EG')}</span>
+                    <span>{new Date(product.created_at).toLocaleDateString('en-US')}</span>
                   </div>
                 </div>
               </div>
@@ -140,15 +140,15 @@ export default async function DashboardOverviewPage() {
                 <Link
                   href={`/products/${product.slug}`}
                   target="_blank"
-                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
-                  title="معاينة في الموقع"
+                  className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
+                  title="View Live"
                 >
                   <ExternalLink className="w-4 h-4" />
                 </Link>
                 <Link
                   href={`/dashboard/products/${product.id}/edit`}
-                  className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                  title="تعديل"
+                  className="p-2 rounded-lg bg-zinc-800/80 hover:bg-primary hover:text-zinc-950 text-zinc-300 transition-colors"
+                  title="Edit Project"
                 >
                   <Edit className="w-4 h-4" />
                 </Link>

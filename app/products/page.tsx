@@ -1,16 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { getProducts } from '@/lib/products-service';
 import { Product } from '@/types';
-import { CATEGORIES } from '@/lib/mock-data';
-import { Search, Sparkles, Filter, PackageOpen } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-function ProductsContent() {
+function ProjectsContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
 
@@ -34,7 +33,6 @@ function ProductsContent() {
     loadData();
   }, []);
 
-  // Update selectedCategory if query param changes
   useEffect(() => {
     const cat = searchParams.get('category');
     if (cat) {
@@ -42,11 +40,20 @@ function ProductsContent() {
     }
   }, [searchParams]);
 
-  // Filter products by category and search query
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesCategory =
-        selectedCategory === 'all' || p.category === selectedCategory;
+        selectedCategory === 'all' ||
+        ((selectedCategory === 'kitchen' || selectedCategory === 'kitchens') &&
+          (p.category === 'kitchens' || p.category === 'kitchen')) ||
+        ((selectedCategory === 'dressing' || selectedCategory === 'dressing-rooms') &&
+          (p.category === 'dressing' || p.category === 'dressing-rooms')) ||
+        ((selectedCategory === 'living' || selectedCategory === 'living-rooms') &&
+          (p.category === 'living-rooms' || p.category === 'living')) ||
+        ((selectedCategory === 'furniture' || selectedCategory === 'custom') &&
+          (p.category === 'furniture' || p.category === 'custom')) ||
+        p.category === selectedCategory;
+
       const matchesSearch =
         searchQuery.trim() === '' ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,120 +64,184 @@ function ProductsContent() {
     });
   }, [products, selectedCategory, searchQuery]);
 
+  const counts = useMemo(() => {
+    return {
+      all: products.length,
+      kitchens: products.filter((p) => p.category === 'kitchens' || p.category === 'kitchen').length,
+      dressing: products.filter((p) => p.category === 'dressing' || p.category === 'dressing-rooms').length,
+      living: products.filter((p) => p.category === 'living-rooms' || p.category === 'living').length,
+      furniture: products.filter((p) => p.category === 'furniture' || p.category === 'custom').length,
+    };
+  }, [products]);
+
   return (
-    <>
-      {/* Page Header Banner */}
-      <section className="relative py-16 bg-[#181822] border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>معرض الأعمال الحصرية</span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
-            كتالوج المنتجات ومشاريع فلورنس
-          </h1>
-          <p className="text-zinc-400 text-base max-w-2xl mx-auto leading-relaxed">
-            استكشف أحدث تصاميم المطابخ المودرن والكلاسيك والدريسنج روم المنفذة بأعلى جودة وإتقان لعملائنا في مصر.
-          </p>
+    <div className="bg-white min-h-screen flex flex-col">
+      <Navbar />
 
-          {/* Search Input Bar */}
-          <div className="mt-8 max-w-md mx-auto relative">
-            <input
-              type="text"
-              placeholder="ابحث عن مطبخ، خامة، أو دريسنج روم..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#121217] border border-zinc-700 focus:border-primary text-white rounded-full py-3.5 pr-11 pl-4 text-sm outline-none transition-all placeholder:text-zinc-500 shadow-inner"
-            />
-            <Search className="w-5 h-5 text-zinc-400 absolute right-4 top-3.5" />
+      {/* Page Header Start */}
+      <div className="container-fluid bg-secondary py-5">
+        <div className="container py-5">
+          <div className="row align-items-center py-4">
+            <div className="col-md-6 text-center text-md-left">
+              <h1 className="mb-4 mb-md-0 text-primary text-uppercase font-weight-bold">
+                Our Projects
+              </h1>
+            </div>
+            <div className="col-md-6 text-center text-md-right">
+              <div className="d-inline-flex align-items-center">
+                <Link className="btn btn-outline-primary" href="/" style={{ borderRadius: '0' }}>
+                  Home
+                </Link>
+                <i className="fas fa-angle-double-right text-primary mx-2"></i>
+                <span
+                  className="btn btn-outline-primary active"
+                  style={{ borderRadius: '0', cursor: 'default' }}
+                >
+                  Our Projects
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+      {/* Page Header End */}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar justify-start sm:justify-center">
-          {CATEGORIES.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
-                selectedCategory === category.id
-                  ? 'bg-primary text-zinc-950 shadow-lg shadow-primary/20 scale-105'
-                  : 'bg-[#181822] text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
-              }`}
-            >
-              {category.nameAr}
-            </button>
-          ))}
-        </div>
+      {/* Projects Section */}
+      <main className="container-fluid py-5 flex-grow">
+        <div className="container py-5">
+          <div className="row justify-content-center">
+            <div className="col-lg-6 col-md-8 text-center mb-4">
+              <h6 className="text-primary font-weight-normal text-uppercase mb-3">Our Projects</h6>
+              <h1 className="mb-4 font-weight-bold">
+                Some Of Our Awesome Interior Designing Projects
+              </h1>
+            </div>
+          </div>
 
-        {/* Results Count */}
-        <div className="flex items-center justify-between text-xs text-zinc-400 mb-6">
-          <span className="flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-primary" />
-            <span>عرض: {filteredProducts.length} عمل متاح</span>
-          </span>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="text-primary hover:underline"
-            >
-              إلغاء البحث
-            </button>
+          {/* Search and Filters */}
+          <div className="row mb-4">
+            <div className="col-md-6 mx-auto mb-3">
+              <div className="input-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by model, material, or design style..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ borderRadius: '0', height: '48px' }}
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-primary px-4 font-weight-bold"
+                    type="button"
+                    style={{ borderRadius: '0' }}
+                  >
+                    <i className="fa fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 text-center">
+              <ul className="list-inline mb-4 d-flex flex-wrap justify-content-center" style={{ gap: '8px' }}>
+                <li
+                  className={`btn btn-outline-primary m-1 px-3 py-2 font-weight-bold ${
+                    selectedCategory === 'all' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedCategory('all')}
+                  style={{ borderRadius: '4px', cursor: 'pointer', fontSize: '13px', letterSpacing: '0.5px' }}
+                >
+                  All Projects <span className="badge badge-light text-dark ml-1">{counts.all}</span>
+                </li>
+                <li
+                  className={`btn btn-outline-primary m-1 px-3 py-2 font-weight-bold ${
+                    selectedCategory === 'kitchen' || selectedCategory === 'kitchens' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedCategory('kitchens')}
+                  style={{ borderRadius: '4px', cursor: 'pointer', fontSize: '13px', letterSpacing: '0.5px' }}
+                >
+                  Kitchens <span className="badge badge-light text-dark ml-1">{counts.kitchens}</span>
+                </li>
+                <li
+                  className={`btn btn-outline-primary m-1 px-3 py-2 font-weight-bold ${
+                    selectedCategory === 'dressing' || selectedCategory === 'dressing-rooms' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedCategory('dressing-rooms')}
+                  style={{ borderRadius: '4px', cursor: 'pointer', fontSize: '13px', letterSpacing: '0.5px' }}
+                >
+                  Dressing Rooms <span className="badge badge-light text-dark ml-1">{counts.dressing}</span>
+                </li>
+                <li
+                  className={`btn btn-outline-primary m-1 px-3 py-2 font-weight-bold ${
+                    selectedCategory === 'living' || selectedCategory === 'living-rooms' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedCategory('living-rooms')}
+                  style={{ borderRadius: '4px', cursor: 'pointer', fontSize: '13px', letterSpacing: '0.5px' }}
+                >
+                  Living & Decor <span className="badge badge-light text-dark ml-1">{counts.living}</span>
+                </li>
+                <li
+                  className={`btn btn-outline-primary m-1 px-3 py-2 font-weight-bold ${
+                    selectedCategory === 'furniture' || selectedCategory === 'custom' ? 'active' : ''
+                  }`}
+                  onClick={() => setSelectedCategory('furniture')}
+                  style={{ borderRadius: '4px', cursor: 'pointer', fontSize: '13px', letterSpacing: '0.5px' }}
+                >
+                  Custom Furniture <span className="badge badge-light text-dark ml-1">{counts.furniture}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Grid */}
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Loading projects catalog...</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <div className="row mx-1">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-5">
+              <i className="fa fa-folder-open display-4 text-muted mb-3"></i>
+              <h4>No projects found matching your search</h4>
+              <p className="text-muted">Try searching with other keywords or select a different category.</p>
+              <button
+                className="btn btn-primary mt-2 font-weight-bold px-4 py-2"
+                style={{ borderRadius: '0' }}
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSearchQuery('');
+                }}
+              >
+                Reset Filter
+              </button>
+            </div>
           )}
         </div>
-
-        {/* Loading Skeleton */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div
-                key={n}
-                className="bg-[#181822] rounded-2xl h-96 animate-pulse border border-zinc-800"
-              />
-            ))}
-          </div>
-        ) : filteredProducts.length > 0 ? (
-          /* Products Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="text-center py-20 bg-[#181822]/40 rounded-3xl border border-zinc-800 p-8">
-            <PackageOpen className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">لم نجد نتائج مطابقة</h3>
-            <p className="text-zinc-400 text-sm max-w-md mx-auto mb-6">
-              جرّب البحث بكلمات أخرى أو اختر تصنيفاً آخر، أو تواصل معنا لتصميم فكرتك الخاصة مباشرة!
-            </p>
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchQuery('');
-              }}
-              className="px-6 py-2.5 bg-primary text-zinc-950 font-bold rounded-full text-sm"
-            >
-              عرض جميع الأعمال
-            </button>
-          </div>
-        )}
       </main>
-    </>
+
+      <Footer />
+    </div>
   );
 }
 
-export default function ProductsPage() {
+export default function ProjectsPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#121217]">
-      <Navbar />
-      <Suspense fallback={<div className="text-center py-20 text-zinc-500 text-sm">جاري تحميل المعرض...</div>}>
-        <ProductsContent />
-      </Suspense>
-      <Footer />
-    </div>
+    <Suspense
+      fallback={
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status"></div>
+        </div>
+      }
+    >
+      <ProjectsContent />
+    </Suspense>
   );
 }

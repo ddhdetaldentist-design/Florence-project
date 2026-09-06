@@ -2,41 +2,64 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Home, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#121217]">
+    <div className="bg-white min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center px-4 py-20">
-        <div className="text-center max-w-md mx-auto space-y-6">
-          <span className="text-6xl sm:text-8xl font-black text-primary block">
-            404
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
-            الصفحة غير موجودة
-          </h1>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            عذراً، يبدو أن المنتج أو الصفحة التي تبحث عنها قد تم نقلها أو حذفها. يمكنك العودة لكتالوج المنتجات لاستعراض باقي أعمالنا.
-          </p>
-          <div className="flex items-center justify-center gap-4 pt-2">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              <span>الرئيسية</span>
-            </Link>
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-zinc-950 text-xs font-black transition-colors"
-            >
-              <span>تصفح الكتالوج</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
+
+      {/* Page Header Start */}
+      <div className="container-fluid bg-secondary py-5">
+        <div className="container py-5">
+          <div className="row align-items-center py-4">
+            <div className="col-md-6 text-center text-md-left">
+              <h1 className="mb-4 mb-md-0 text-primary text-uppercase font-weight-bold">
+                Page Not Found
+              </h1>
+            </div>
+            <div className="col-md-6 text-center text-md-right">
+              <div className="d-inline-flex align-items-center">
+                <Link className="btn btn-outline-primary" href="/" style={{ borderRadius: '0' }}>
+                  Home
+                </Link>
+                <i className="fas fa-angle-double-right text-primary mx-2"></i>
+                <span
+                  className="btn btn-outline-primary active"
+                  style={{ borderRadius: '0', cursor: 'default' }}
+                >
+                  404 Error
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      {/* Page Header End */}
+
+      <div className="container py-5 my-5 flex-grow text-center">
+        <h1 className="display-1 text-primary font-weight-bold">404</h1>
+        <h2 className="mb-4 font-weight-bold">Sorry, Page Not Found</h2>
+        <p className="lead text-muted mb-5">
+          The link you requested is unavailable or has been moved. You can return to the homepage or explore our projects portfolio.
+        </p>
+        <div>
+          <Link
+            href="/"
+            className="btn btn-secondary py-3 px-5 mr-3 font-weight-bold"
+            style={{ borderRadius: '0' }}
+          >
+            Back to Home
+          </Link>
+          <Link
+            href="/products"
+            className="btn btn-primary py-3 px-5 font-weight-bold text-dark"
+            style={{ borderRadius: '0' }}
+          >
+            Browse Projects
+          </Link>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );

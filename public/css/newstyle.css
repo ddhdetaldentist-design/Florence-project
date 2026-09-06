@@ -1,0 +1,41 @@
+#florene{
+    height: 100px;
+    width: 200px;
+    
+}
+#revie{
+    height: 100% !important;
+    width: 100%;
+}
+#img-1{
+    max-width: 140%;
+}
+#img-2{
+    max-width: 115%;
+}
+#img-4{
+    max-width: 134%;
+}
+#img-5{
+    max-width: 120%;
+}
+#img-6{
+    max-width: 137%;
+}
+#img-7{
+    max-width: 138%;
+}
+#kitchen{
+    display: none;
+}
+#dressing{
+    display: none;
+}
+
+ul .kitchen {
+    
+}
+ul .dressing{
+    
+}
+

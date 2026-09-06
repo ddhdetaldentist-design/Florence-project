@@ -1,184 +1,171 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Phone, Mail, MapPin, Facebook, Instagram, ShieldCheck, Clock, Award, ArrowUpLeft } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0b0b0f] text-zinc-400 border-t border-zinc-800 pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          {/* Brand Info */}
-          <div className="space-y-4">
-            <div className="relative h-14 w-44">
-              <Image
-                src="/img/WhatsApp_Image_2022-09-26_at_10.58.16_PM-removebg-preview.png"
-                alt="Florence Kitchen Logo"
-                fill
-                className="object-contain"
-              />
+    <>
+      <footer id="flex" className="container-fluid bg-dark text-white py-5 px-sm-3 px-md-5">
+        <div className="container">
+          <div className="row pt-5">
+            <div className="col-lg-3 col-md-6 mb-5">
+              <h4 className="text-primary mb-4">Get In Touch</h4>
+              <p>
+                <i className="fa fa-map-marker-alt mr-2 text-primary"></i>
+                Obour City - Ninth District - Qatar Al Nada Street
+              </p>
+              <p>
+                <i className="fa fa-phone-alt mr-2 text-primary"></i>
+                0106 577 2456
+              </p>
+              <p>
+                <i className="fa fa-envelope mr-2 text-primary"></i>
+                florencenew2020@gmail.com
+              </p>
+              <div className="d-flex justify-content-start mt-4">
+                <a
+                  className="btn btn-outline-light rounded-circle text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                  style={{ width: '38px', height: '38px' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="#"
+                  aria-label="Twitter"
+                >
+                  <i className="fab fa-twitter"></i>
+                </a>
+                <a
+                  className="btn btn-outline-light rounded-circle text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                  style={{ width: '38px', height: '38px' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.facebook.com/Florencekitchenandfurniture"
+                  aria-label="Facebook"
+                >
+                  <i className="fab fa-facebook-f"></i>
+                </a>
+                <a
+                  className="btn btn-outline-light rounded-circle text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                  style={{ width: '38px', height: '38px' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.linkedin.com/in/hassan-samhan-194889247/"
+                  aria-label="LinkedIn"
+                >
+                  <i className="fab fa-linkedin-in"></i>
+                </a>
+                <a
+                  className="btn btn-outline-light rounded-circle text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                  style={{ width: '38px', height: '38px' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.instagram.com/florence_new_2020/"
+                  aria-label="Instagram"
+                >
+                  <i className="fab fa-instagram"></i>
+                </a>
+              </div>
             </div>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              شركة فلورنس للمطابخ والدريسنج روم والأثاث المودرن. نبتكر تصاميم فريدة وعصرية تناسب ذوقك وتلبي احتياجات منزلك مع ضمان معتمد لمدة 10 سنوات على جميع الأعمال.
+
+            <div className="col-lg-3 col-md-6 mb-5">
+              <h4 className="text-primary mb-4">Quick Links</h4>
+              <div className="d-flex flex-column justify-content-start">
+                <Link className="text-white mb-2" href="/">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Home
+                </Link>
+                <Link className="text-white mb-2" href="/about">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>About Us
+                </Link>
+                <Link className="text-white mb-2" href="/service">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Our Services
+                </Link>
+                <Link className="text-white mb-2" href="/products">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Our Projects
+                </Link>
+                <Link className="text-white" href="/contact">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Contact Us
+                </Link>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6 mb-5">
+              <h4 className="text-primary mb-4">Our Specialities</h4>
+              <div className="d-flex flex-column justify-content-start">
+                <Link className="text-white mb-2" href="/products?category=kitchens">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Modern Kitchens
+                </Link>
+                <Link className="text-white mb-2" href="/products?category=dressing">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Dressing Rooms
+                </Link>
+                <Link className="text-white mb-2" href="/products?category=furniture">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Modern Furniture
+                </Link>
+                <Link className="text-white mb-2" href="/service">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>3D Interior Design
+                </Link>
+                <Link className="text-white" href="/dashboard">
+                  <i className="fa fa-angle-right mr-2 text-primary"></i>Admin Dashboard
+                </Link>
+              </div>
+            </div>
+
+            <div className="col-lg-3 col-md-6 mb-5">
+              <h4 className="text-primary mb-4">About Florence</h4>
+              <p className="text-white-50">
+                Pioneers in designing and manufacturing high-end modern kitchens, dressing rooms, and bespoke furniture with Austrian Blum hardware and 10-year warranty.
+              </p>
+              <div className="mt-3">
+                <a
+                  href="https://wa.me/201065772456"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary text-dark font-weight-bold px-3 py-2"
+                  style={{ borderRadius: '0' }}
+                >
+                  <i className="fab fa-whatsapp mr-1"></i> WhatsApp: 0106 577 2456
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="container border-top border-secondary pt-4 mt-2">
+            <p className="m-0 text-center text-white">
+              &copy;{' '}
+              <Link className="text-white font-weight-bold" href="/">
+                florence-kitchen
+              </Link>
+              . All Rights Reserved. Designed by{' '}
+              <a
+                className="text-white font-weight-bold"
+                href="https://www.linkedin.com/in/hassan-samhan-194889247/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                hassan-samhan
+              </a>
             </p>
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://www.facebook.com/Florencekitchenandfurniture"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 hover:text-primary hover:border-primary transition-all"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="https://www.instagram.com/florence_new_2020/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 hover:text-primary hover:border-primary transition-all"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold text-base mb-5 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              <span>روابط سريعة</span>
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>الصفحة الرئيسية</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/products" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>معرض المنتجات والمشاريع</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/#services" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>خدمات التصميم والتركيب</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/#about" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>عن فلورنس كيتشن</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="text-primary/90 hover:text-primary font-semibold transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>لوحة تحكم الإدارة</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h4 className="text-white font-bold text-base mb-5 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              <span>تخصصاتنا</span>
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/products?category=kitchens" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>مطابخ أكريليك وبولي لاك</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=kitchens" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>مطابخ كلاسيك وخشب زان</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=dressing-rooms" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>غرف ملابس (Dressing Rooms)</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=living-rooms" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>وحدات تلفزيون وليفنج روم</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=furniture" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-primary" />
-                  <span>أثاث مخصص للمنازل والفيلات</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Details */}
-          <div>
-            <h4 className="text-white font-bold text-base mb-5 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              <span>تواصل مع الفرع الرئيسي</span>
-            </h4>
-            <ul className="space-y-4 text-sm">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span>مدينة العبور - الحي التاسع - شارع قطر الندى، القاهرة</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-primary shrink-0" />
-                <a href="tel:01065772456" dir="ltr" className="hover:text-primary font-bold text-white transition-colors">
-                  0106 577 2456
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-primary shrink-0" />
-                <a href="mailto:florencenew2020@gmail.com" className="hover:text-primary transition-colors">
-                  florencenew2020@gmail.com
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-primary shrink-0" />
-                <span>يومياً من 11 صباحاً حتى 10 مساءً</span>
-              </li>
-            </ul>
           </div>
         </div>
+      </footer>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-500 gap-4">
-          <p>
-            © {new Date().getFullYear()} فلورنس للمطابخ والأثاث (Florence Kitchen). تم التطوير بواسطة{' '}
-            <a
-              href="https://www.linkedin.com/in/hassan-samhan-194889247/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-bold"
-            >
-              Hassan Samhan
-            </a>
-          </p>
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-4 h-4 text-primary" />
-              <span>ضمان 10 سنوات معتمد</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Award className="w-4 h-4 text-primary" />
-              <span>خامات أوروبية أصلية 100%</span>
-            </span>
-          </div>
-        </div>
-      </div>
-    </footer>
+      {/* Back to Top */}
+      <a
+        href="#"
+        className="btn btn-lg btn-primary back-to-top"
+        style={{
+          position: 'fixed',
+          bottom: '25px',
+          right: '85px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '45px',
+          height: '45px',
+          zIndex: 99,
+          borderRadius: '0',
+        }}
+        aria-label="Back to top"
+      >
+        <i className="fa fa-angle-double-up text-dark"></i>
+      </a>
+    </>
   );
 }

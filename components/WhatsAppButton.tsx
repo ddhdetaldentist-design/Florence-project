@@ -5,7 +5,9 @@ import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppButton() {
   const phoneNumber = '201065772456';
-  const defaultMessage = encodeURIComponent('مرحباً فلورنس، أود الاستفسار عن تفاصيل وتصاميم المطابخ والمشاريع.');
+  const defaultMessage = encodeURIComponent(
+    'Hello Florence, I would like to inquire about kitchen designs and custom projects.'
+  );
 
   return (
     <a
@@ -13,6 +15,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 left-6 z-40 flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white px-4 py-3 rounded-full shadow-2xl shadow-green-900/40 hover:scale-105 active:scale-95 transition-all duration-300 font-bold text-sm group"
+      style={{ textDecoration: 'none' }}
       aria-label="Contact via WhatsApp"
     >
       <div className="relative">
@@ -22,7 +25,7 @@ export default function WhatsAppButton() {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
         </span>
       </div>
-      <span className="hidden sm:inline font-semibold">تحدث مع مهندس التصميم</span>
+      <span className="hidden sm:inline font-semibold">Chat with Design Consultant</span>
     </a>
   );
 }
