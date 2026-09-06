@@ -117,6 +117,29 @@ function LoginForm() {
         >
           {loading ? 'Verifying credentials...' : 'Sign In'}
         </button>
+
+        {/* Demo Credentials Quick Box */}
+        <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl text-center space-y-1.5">
+          <div className="text-[11px] text-zinc-400">
+            Demo Credentials (Direct Access):
+          </div>
+          <div className="text-xs font-mono text-primary font-bold">
+            admin@florence.com / admin
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEmail('admin@florence.com');
+              setPassword('admin123');
+              setTimeout(() => {
+                router.push('/dashboard');
+              }, 300);
+            }}
+            className="text-[11px] text-zinc-300 underline hover:text-white pt-1 block mx-auto"
+          >
+            Click here for 1-Click Demo Login
+          </button>
+        </div>
       </form>
 
       <div className="text-center pt-2">
