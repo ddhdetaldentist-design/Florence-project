@@ -146,7 +146,7 @@ export default function SiteContentPage() {
             activeTab === 'hero' ? 'bg-primary text-zinc-950' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
           }`}
         >
-          1. Hero Carousel (السلايدر)
+          1. Hero Carousel
         </button>
         <button
           onClick={() => setActiveTab('about')}
@@ -154,7 +154,7 @@ export default function SiteContentPage() {
             activeTab === 'about' ? 'bg-primary text-zinc-950' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
           }`}
         >
-          2. About Us & Stats (من نحن)
+          2. About Us & Stats
         </button>
         <button
           onClick={() => setActiveTab('offerings')}
@@ -162,7 +162,7 @@ export default function SiteContentPage() {
             activeTab === 'offerings' ? 'bg-primary text-zinc-950' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
           }`}
         >
-          3. What We Offer (ما نقدمه)
+          3. What We Offer
         </button>
         <button
           onClick={() => setActiveTab('whyUs')}
@@ -170,7 +170,7 @@ export default function SiteContentPage() {
             activeTab === 'whyUs' ? 'bg-primary text-zinc-950' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
           }`}
         >
-          4. Why Choose Us & Video (لماذا تختارنا والفيديو)
+          4. Why Choose Us & Video
         </button>
       </div>
 
