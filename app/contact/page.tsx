@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import { getSiteSettings, DEFAULT_SITE_SETTINGS } from '@/lib/site-settings-service';
+import { submitInquiry } from '@/lib/products-service';
+import { SiteSettings } from '@/types';
 
 export default function ContactPage() {
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -14,18 +19,43 @@ export default function ContactPage() {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getSiteSettings();
+        if (data) setSettings(data);
+      } catch (err) {
+        console.warn('Failed to load settings', err);
+      }
+    }
+    load();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. Submit to Supabase inquiries database
+    try {
+      await submitInquiry({
+        name: formData.name,
+        phone: formData.phone,
+        message: `[Subject: ${formData.subject}] ${formData.message}`,
+      });
+    } catch (err) {
+      console.warn('Inquiry db save error', err);
+    }
+
+    // 2. Open WhatsApp for instant live messaging
     const msg = encodeURIComponent(
-      `Hello Florence, my name is ${formData.name} (Phone: ${formData.phone})\nSubject: ${formData.subject}\nMessage: ${formData.message}`
+      `Hello Florence Kitchen, my name is ${formData.name} (Phone: ${formData.phone})\nSubject: ${formData.subject}\nMessage: ${formData.message}`
     );
-    window.open(`https://wa.me/201065772456?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${settings.contact.whatsapp}?text=${msg}`, '_blank');
     setSubmitted(true);
   };
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar settings={settings} />
 
       {/* Page Header Start */}
       <div className="container-fluid bg-secondary py-5">
@@ -66,7 +96,7 @@ export default function ContactPage() {
                   <div className="d-flex flex-column">
                     <h4 className="text-secondary font-weight-bold">Our Office</h4>
                     <p className="m-0 text-dark">
-                      Obour City - Ninth District - Qatar Al Nada Street
+                      {settings.contact.address}
                     </p>
                   </div>
                 </div>
@@ -74,14 +104,14 @@ export default function ContactPage() {
                   <h1 className="flaticon-email font-weight-normal text-secondary m-0 mr-3"></h1>
                   <div className="d-flex flex-column">
                     <h4 className="text-secondary font-weight-bold">Email Us</h4>
-                    <p className="m-0 text-dark">florencenew2020@gmail.com</p>
+                    <p className="m-0 text-dark">{settings.contact.email}</p>
                   </div>
                 </div>
                 <div className="d-inline-flex border border-secondary p-4 align-items-center">
                   <h1 className="flaticon-telephone font-weight-normal text-secondary m-0 mr-3"></h1>
                   <div className="d-flex flex-column">
                     <h4 className="text-secondary font-weight-bold">Call Us</h4>
-                    <p className="m-0 text-dark">0106 577 2456</p>
+                    <p className="m-0 text-dark">{settings.contact.phoneDisplay || settings.contact.phone}</p>
                   </div>
                 </div>
               </div>
@@ -98,7 +128,7 @@ export default function ContactPage() {
                       <i className="fa fa-check-circle mr-2"></i> Message Sent Successfully!
                     </h5>
                     <p className="m-0">
-                      Our customer service team will reach out to you shortly.
+                      Our customer service and engineering team will reach out to you shortly.
                     </p>
                   </div>
                 ) : (
@@ -165,7 +195,8 @@ export default function ContactPage() {
       </main>
       {/* Contact End */}
 
-      <Footer />
+      <Footer settings={settings} />
+      <WhatsAppButton whatsappNumber={settings.contact.whatsapp} />
     </div>
   );
 }

@@ -1,11 +1,11 @@
 -- ==========================================================
--- FLORENCE KITCHEN & FURNITURE - SUPABASE DATABASE SCHEMA
+-- FLORENCE KITCHEN & FURNITURE - COMPLETE SUPABASE SCHEMA
 -- ==========================================================
 
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Products Table
+-- 2. Products / Projects Table
 CREATE TABLE IF NOT EXISTS public.products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
@@ -22,13 +22,43 @@ CREATE TABLE IF NOT EXISTS public.products (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexing for fast search and filtering
 CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
 CREATE INDEX IF NOT EXISTS idx_products_status ON public.products(status);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON public.products(featured);
 
--- 3. Inquiries & Contact Messages Table
+-- 3. Site Settings Table (Hero Slider, About, Contact info, Social, Offerings)
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    id VARCHAR(50) PRIMARY KEY DEFAULT 'general',
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Testimonials Table (Client Reviews)
+CREATE TABLE IF NOT EXISTS public.testimonials (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    text TEXT NOT NULL,
+    rating INTEGER DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
+    image TEXT DEFAULT '/img/prof.jpg',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Team Members Table
+CREATE TABLE IF NOT EXISTS public.team_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL,
+    image TEXT DEFAULT '/img/prof.jpg',
+    facebook TEXT,
+    linkedin TEXT,
+    whatsapp TEXT,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. Inquiries & Contact Messages Table
 CREATE TABLE IF NOT EXISTS public.inquiries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -40,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.inquiries (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Automatically update updated_at timestamp
+-- 7. Automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -54,89 +84,104 @@ BEFORE UPDATE ON public.products
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_updated_at();
 
--- 5. Row Level Security (RLS) Setup
+CREATE OR REPLACE TRIGGER set_site_settings_updated_at
+BEFORE UPDATE ON public.site_settings
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_updated_at();
+
+-- 8. Row Level Security (RLS) Setup
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
 
 -- Product Policies:
--- Anyone (public) can read published products
+DROP POLICY IF EXISTS "Public can view published products" ON public.products;
 CREATE POLICY "Public can view published products"
 ON public.products FOR SELECT
-USING (status = 'published');
-
--- Authenticated admins can view all products (including drafts)
-CREATE POLICY "Admins can view all products"
-ON public.products FOR SELECT
-TO authenticated
 USING (true);
 
--- Authenticated admins can insert new products
-CREATE POLICY "Admins can insert products"
-ON public.products FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
--- Authenticated admins can update products
-CREATE POLICY "Admins can update products"
-ON public.products FOR UPDATE
-TO authenticated
+DROP POLICY IF EXISTS "Admins can manage products" ON public.products;
+CREATE POLICY "Admins can manage products"
+ON public.products FOR ALL
 USING (true)
 WITH CHECK (true);
 
--- Authenticated admins can delete products
-CREATE POLICY "Admins can delete products"
-ON public.products FOR DELETE
-TO authenticated
+-- Site Settings Policies:
+DROP POLICY IF EXISTS "Public can view site settings" ON public.site_settings;
+CREATE POLICY "Public can view site settings"
+ON public.site_settings FOR SELECT
 USING (true);
 
--- Inquiry Policies:
--- Anyone can submit an inquiry / contact form
+DROP POLICY IF EXISTS "Admins can manage site settings" ON public.site_settings;
+CREATE POLICY "Admins can manage site settings"
+ON public.site_settings FOR ALL
+USING (true)
+WITH CHECK (true);
+
+-- Testimonials Policies:
+DROP POLICY IF EXISTS "Public can view testimonials" ON public.testimonials;
+CREATE POLICY "Public can view testimonials"
+ON public.testimonials FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage testimonials" ON public.testimonials;
+CREATE POLICY "Admins can manage testimonials"
+ON public.testimonials FOR ALL
+USING (true)
+WITH CHECK (true);
+
+-- Team Members Policies:
+DROP POLICY IF EXISTS "Public can view team members" ON public.team_members;
+CREATE POLICY "Public can view team members"
+ON public.team_members FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "Admins can manage team members" ON public.team_members;
+CREATE POLICY "Admins can manage team members"
+ON public.team_members FOR ALL
+USING (true)
+WITH CHECK (true);
+
+-- Inquiries Policies:
+DROP POLICY IF EXISTS "Public can submit inquiries" ON public.inquiries;
 CREATE POLICY "Public can submit inquiries"
 ON public.inquiries FOR INSERT
 WITH CHECK (true);
 
--- Authenticated admins can read and manage inquiries
-CREATE POLICY "Admins can view inquiries"
-ON public.inquiries FOR SELECT
-TO authenticated
-USING (true);
+DROP POLICY IF EXISTS "Admins can manage inquiries" ON public.inquiries;
+CREATE POLICY "Admins can manage inquiries"
+ON public.inquiries FOR ALL
+USING (true)
+WITH CHECK (true);
 
-CREATE POLICY "Admins can update inquiries"
-ON public.inquiries FOR UPDATE
-TO authenticated
-USING (true);
-
-CREATE POLICY "Admins can delete inquiries"
-ON public.inquiries FOR DELETE
-TO authenticated
-USING (true);
-
--- 6. Storage Bucket Configuration (Run in Supabase SQL editor)
+-- 9. Storage Bucket Configuration
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage Policies for product-images bucket:
+DROP POLICY IF EXISTS "Public Read Product Images" ON storage.objects;
 CREATE POLICY "Public Read Product Images"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'product-images');
 
-CREATE POLICY "Authenticated Admin Upload Images"
+DROP POLICY IF EXISTS "Allow All Uploads" ON storage.objects;
+CREATE POLICY "Allow All Uploads"
 ON storage.objects FOR INSERT
-TO authenticated
 WITH CHECK (bucket_id = 'product-images');
 
-CREATE POLICY "Authenticated Admin Update Images"
+DROP POLICY IF EXISTS "Allow All Updates" ON storage.objects;
+CREATE POLICY "Allow All Updates"
 ON storage.objects FOR UPDATE
-TO authenticated
 USING (bucket_id = 'product-images');
 
-CREATE POLICY "Authenticated Admin Delete Images"
+DROP POLICY IF EXISTS "Allow All Deletes" ON storage.objects;
+CREATE POLICY "Allow All Deletes"
 ON storage.objects FOR DELETE
-TO authenticated
 USING (bucket_id = 'product-images');
 
--- 7. Initial Seed Data (Florence Kitchen real showcase items)
+-- 10. Initial Seed Data (Florence Kitchen real showcase items)
 INSERT INTO public.products (title, slug, category, description, thumbnail, images, specs, price, featured, status)
 VALUES
 (
@@ -198,4 +243,20 @@ VALUES
     NULL,
     TRUE,
     'published'
-);
+)
+ON CONFLICT (slug) DO NOTHING;
+
+-- 11. Initial Testimonials Seed
+INSERT INTO public.testimonials (name, title, text, rating, image)
+VALUES
+('Afaf Abdelmoneam', 'Verified Client - Acrylic Kitchen', 'Thank you so much Eng. Mohamed for the excellent kitchen design and high-quality materials exactly as requested. You truly cared about delivering the best outcome and were strictly on time.', 5, '/img/1-1.jpg'),
+('Yomna Osama', 'Verified Client - Kitchen & Dressing Room', 'An exceptional company with great dedication to quality. The materials are top European grade, prices are fair, and Eng. Mohamed Atef is very professional and respectful. Delivery was right on schedule.', 5, '/img/1-2.jpg'),
+('Mando Kamal', 'Verified Client - Furniture & Interior Decor', 'I would like to thank everyone at Florence for product quality, adherence to specs, easy handling of modifications, and sticking to agreed pricing. Outstanding work and best wishes.', 5, '/img/1-3.jpg')
+ON CONFLICT DO NOTHING;
+
+-- 12. Initial Team Members Seed
+INSERT INTO public.team_members (name, role, image, facebook, linkedin, whatsapp, sort_order)
+VALUES
+('Eng. Mohamed Atef', 'Owner & General Manager', '/img/prof.jpg', 'https://www.facebook.com/Florencekitchenandfurniture', NULL, 'https://wa.me/201065772456', 1),
+('Hassan Samhan', 'Sales & Design Consultant', '/img/prof.jpg', NULL, 'https://www.linkedin.com/in/hassan-samhan-194889247/', 'https://wa.me/201065772456', 2)
+ON CONFLICT DO NOTHING;

@@ -3,8 +3,8 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 
-export default function WhatsAppButton() {
-  const phoneNumber = '201065772456';
+export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: string }) {
+  const phoneNumber = whatsappNumber || '201065772456';
   const defaultMessage = encodeURIComponent(
     'Hello Florence, I would like to inquire about kitchen designs and custom projects.'
   );

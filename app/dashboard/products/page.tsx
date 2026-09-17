@@ -11,7 +11,6 @@ import {
   Trash2, 
   Edit, 
   ExternalLink, 
-  Sparkles, 
   AlertTriangle,
   Layers
 } from 'lucide-react';

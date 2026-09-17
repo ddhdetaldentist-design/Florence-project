@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
-import { Lock, Mail, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -19,35 +19,27 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    // If Supabase credentials are configured, authenticate with real Supabase Auth
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = createClient();
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (authError) {
-          setError(authError.message);
-          setLoading(false);
-          return;
-        }
-
-        router.push('/dashboard');
-        router.refresh();
-        return;
-      } catch (err: any) {
-        setError(err.message || 'Error occurred during login');
+      if (authError) {
+        setError(authError.message === 'Invalid login credentials' ? 'Invalid email or password' : authError.message);
         setLoading(false);
         return;
       }
-    }
 
-    // Demo Mode fallback: allow direct entry for developer testing
-    setTimeout(() => {
       router.push('/dashboard');
-    }, 500);
+      router.refresh();
+      return;
+    } catch (err: any) {
+      setError(err.message || 'Error occurred during login');
+      setLoading(false);
+      return;
+    }
   };
 
   return (
@@ -65,12 +57,12 @@ function LoginForm() {
           Admin Console Sign In
         </h1>
         <p className="text-xs text-zinc-400">
-          Enter your administrative email and password to manage the project catalog.
+          Enter your administrative credentials to access the management dashboard.
         </p>
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
           {error}
         </div>
       )}
@@ -86,7 +78,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@florence.com"
+              placeholder="admin@example.com"
               className="w-full bg-[#121217] border border-zinc-700 text-white rounded-xl py-3 pl-10 pr-4 text-xs outline-none focus:border-primary placeholder:text-zinc-600"
             />
             <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3.5" />
@@ -117,29 +109,6 @@ function LoginForm() {
         >
           {loading ? 'Verifying credentials...' : 'Sign In'}
         </button>
-
-        {/* Demo Credentials Quick Box */}
-        <div className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl text-center space-y-1.5">
-          <div className="text-[11px] text-zinc-400">
-            Demo Credentials (Direct Access):
-          </div>
-          <div className="text-xs font-mono text-primary font-bold">
-            admin@florence.com / admin
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('admin@florence.com');
-              setPassword('admin123');
-              setTimeout(() => {
-                router.push('/dashboard');
-              }, 300);
-            }}
-            className="text-[11px] text-zinc-300 underline hover:text-white pt-1 block mx-auto"
-          >
-            Click here for 1-Click Demo Login
-          </button>
-        </div>
       </form>
 
       <div className="text-center pt-2">

@@ -3,41 +3,40 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
-import { Product } from '@/types';
+import { Product, SiteSettings, TestimonialItem, TeamMemberItem } from '@/types';
+import { DEFAULT_SITE_SETTINGS, DEFAULT_TESTIMONIALS, DEFAULT_TEAM_MEMBERS } from '@/lib/site-settings-service';
 
 interface HomePageClientProps {
   initialProducts: Product[];
+  initialSettings?: SiteSettings;
+  initialTestimonials?: TestimonialItem[];
+  initialTeam?: TeamMemberItem[];
 }
 
-export default function HomePageClient({ initialProducts }: HomePageClientProps) {
+export default function HomePageClient({ 
+  initialProducts,
+  initialSettings,
+  initialTestimonials,
+  initialTeam
+}: HomePageClientProps) {
+  const settings = initialSettings || DEFAULT_SITE_SETTINGS;
+  const slides = settings.heroSlides && settings.heroSlides.length > 0 ? settings.heroSlides : DEFAULT_SITE_SETTINGS.heroSlides;
+  const reviews = initialTestimonials && initialTestimonials.length > 0 ? initialTestimonials : DEFAULT_TESTIMONIALS;
+  const team = initialTeam && initialTeam.length > 0 ? initialTeam : DEFAULT_TEAM_MEMBERS;
+
   // Hero Carousel State
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = [
-    {
-      image: '/img/1.jpg',
-      badge: 'FLORENCE KITCHEN & FURNITURE',
-      subtitle: 'Creative Interior Design',
-      title: 'Make Your Home Better',
-      desc: 'Top-tier modern kitchen designs with premium Acrylic & HPL materials, Austrian hardware, and a 10-year certified warranty.',
-    },
-    {
-      image: '/img/2.jpg',
-      badge: 'LUXURY LIVING & DRESSING',
-      subtitle: 'Creative Interior Design',
-      title: 'Stay At Home In Peace',
-      desc: 'Bespoke dressing rooms and contemporary furniture combining daily comfort with flawless architectural aesthetics.',
-    },
-  ];
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
-  const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   // Projects Filter State
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -69,31 +68,8 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
     return initialProducts.filter((p) => p.category === activeFilter);
   }, [initialProducts, activeFilter]);
 
-  // Testimonials State (100% English)
+  // Testimonials State
   const [currentReview, setCurrentReview] = useState(0);
-  const reviews = [
-    {
-      name: 'Afaf Abdelmoneam',
-      image: '/img/1-1.jpg',
-      title: 'Verified Client - Acrylic Kitchen',
-      text: 'Thank you so much Eng. Mohamed for the excellent kitchen design and high-quality materials exactly as requested. You truly cared about delivering the best outcome and were strictly on time.',
-      rating: 5,
-    },
-    {
-      name: 'Yomna Osama',
-      image: '/img/1-2.jpg',
-      title: 'Verified Client - Kitchen & Dressing Room',
-      text: 'An exceptional company with great dedication to quality. The materials are top European grade, prices are fair, and Eng. Mohamed Atef is very professional and respectful. Delivery was right on schedule.',
-      rating: 5,
-    },
-    {
-      name: 'Mando Kamal',
-      image: '/img/1-3.jpg',
-      title: 'Verified Client - Furniture & Interior Decor',
-      text: 'I would like to thank everyone at Florence for product quality, adherence to specs, easy handling of modifications, and sticking to agreed pricing. Outstanding work and best wishes.',
-      rating: 5,
-    },
-  ];
 
   const nextReview = () => setCurrentReview((prev) => (prev + 1) % reviews.length);
   const prevReview = () => setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
@@ -185,20 +161,20 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
 
                     <div className="d-flex flex-wrap justify-content-center" style={{ gap: '12px' }}>
                       <Link
-                        href="/products"
+                        href={slide.btnLink || "/products"}
                         className="btn btn-primary py-3 px-5 font-weight-bold text-dark shadow"
                         style={{ borderRadius: '0', letterSpacing: '0.5px' }}
                       >
-                        Explore Our Projects
+                        {slide.btnText || "Explore Our Projects"}
                       </Link>
                       <a
-                        href="https://wa.me/201065772456"
+                        href={`https://wa.me/${settings.contact.whatsapp}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-outline-light py-3 px-4 font-weight-bold"
                         style={{ borderRadius: '0' }}
                       >
-                        <i className="fab fa-whatsapp mr-2 text-success"></i> Book Free Consultation
+                        <i className="fab fa-whatsapp mr-2 text-success"></i> {slide.waBtnText || "Book Free Consultation"}
                       </a>
                     </div>
                   </div>
@@ -289,63 +265,38 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
               >
                 <i className="flaticon-brickwall display-1 font-weight-normal text-secondary mb-3" style={{ fontSize: '75px' }}></i>
                 <h2 className="display-3 mb-2 text-secondary font-weight-bold" style={{ letterSpacing: '1px' }}>
-                  40+
+                  {settings.about.yearsExperience}
                 </h2>
                 <h3 className="m-0 text-secondary font-weight-bold text-uppercase" style={{ letterSpacing: '1px' }}>
-                  Years Experience
+                  {settings.about.experienceSubtitle}
                 </h3>
                 <span className="text-secondary small mt-2 font-weight-bold">
-                  In Kitchen Manufacturing & Modern Furniture
+                  {settings.about.tagline}
                 </span>
               </div>
             </div>
             <div className="col-lg-7 pl-lg-5 d-flex flex-column justify-content-center">
               <h6 className="text-primary font-weight-normal text-uppercase mb-2" style={{ letterSpacing: '2px' }}>
-                Learn About Us
+                {settings.about.experienceBadge}
               </h6>
               <h2 className="mb-4 section-title font-weight-bold text-secondary">
-                We Are The Best Furniture and kitchen design In Your City
+                {settings.about.title}
               </h2>
               <p className="mb-4 text-muted" style={{ lineHeight: '1.9', fontSize: '15.5px' }}>
-                <strong>Florence</strong> is a premier manufacturer and designer of custom modern kitchens, dressing rooms, and architectural furniture based in Obour City. We fuse European design aesthetics with authentic waterproof, heat-resistant materials and original Blum soft-close fittings backed by a 10-year warranty.
+                {settings.about.description}
               </p>
               <div className="row py-2">
-                <div className="col-sm-6 mb-3">
-                  <div className="d-flex align-items-center bg-white p-3 border shadow-sm">
-                    <h1 className="flaticon-house font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '32px' }}></h1>
-                    <div>
-                      <h6 className="text-truncate m-0 font-weight-bold text-secondary">Project Planning</h6>
-                      <small className="text-muted">Precise engineering</small>
+                {settings.about.pillars.map((pillar, pIdx) => (
+                  <div key={pIdx} className="col-sm-6 mb-3">
+                    <div className="d-flex align-items-center bg-white p-3 border shadow-sm">
+                      <h1 className={`${pillar.icon || 'flaticon-house'} font-weight-normal text-primary m-0 mr-3`} style={{ fontSize: '32px' }}></h1>
+                      <div>
+                        <h6 className="text-truncate m-0 font-weight-bold text-secondary">{pillar.title}</h6>
+                        <small className="text-muted">{pillar.subtitle}</small>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-sm-6 mb-3">
-                  <div className="d-flex align-items-center bg-white p-3 border shadow-sm">
-                    <h1 className="flaticon-stairs font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '32px' }}></h1>
-                    <div>
-                      <h6 className="text-truncate m-0 font-weight-bold text-secondary">Interior Design</h6>
-                      <small className="text-muted">Realistic 3D preview</small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-sm-6 mb-3">
-                  <div className="d-flex align-items-center bg-white p-3 border shadow-sm">
-                    <h1 className="flaticon-office font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '32px' }}></h1>
-                    <div>
-                      <h6 className="text-truncate m-0 font-weight-bold text-secondary">Best Price & Value</h6>
-                      <small className="text-muted">Direct factory pricing</small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-sm-6 mb-3">
-                  <div className="d-flex align-items-center bg-white p-3 border shadow-sm">
-                    <h1 className="flaticon-living-room font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '32px' }}></h1>
-                    <div>
-                      <h6 className="text-truncate m-0 font-weight-bold text-secondary">Furniture Design</h6>
-                      <small className="text-muted">Custom built to order</small>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -365,242 +316,80 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
                   className="text-primary font-weight-bold small text-uppercase"
                   style={{ letterSpacing: '2px', fontSize: '11px' }}
                 >
-                  WHAT WE OFFER AT FLORENCE KITCHEN
+                  {settings.offerings.badge}
                 </span>
               </div>
               <h2 className="mb-3 font-weight-bold text-secondary display-5" style={{ letterSpacing: '-0.5px' }}>
-                What We Offer at Florence Kitchen
+                {settings.offerings.title}
               </h2>
               <p className="text-muted mx-auto" style={{ maxWidth: '720px', lineHeight: '1.8', fontSize: '15px' }}>
-                Integrated solutions for the modern home blending elegance with practical functionality, manufactured with state-of-the-art Italian CNC machinery.
+                {settings.offerings.description}
               </p>
             </div>
           </div>
 
           <div className="row g-4">
-            {/* Offering Card 1: Top Demand */}
-            <div className="col-lg-3 col-md-6 mb-4 d-flex">
-              <div
-                className="card w-100 border-0 bg-light shadow-sm overflow-hidden flex-column justify-content-between transition-all"
-                style={{
-                  borderRadius: '10px',
-                  borderTop: '4px solid #DFB163',
-                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 14px 28px rgba(0,0,0,0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                }}
-              >
-                <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
-                  <img
-                    src="/img/1.jpg"
-                    alt="Modern & Classic Kitchens"
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <div className="position-absolute" style={{ top: '12px', left: '12px', zIndex: 2 }}>
-                    <span
-                      className="badge px-2.5 py-1 font-weight-bold text-uppercase shadow-sm"
-                      style={{ backgroundColor: '#DFB163', color: '#181818', fontSize: '10px', letterSpacing: '1px' }}
-                    >
-                      Top Demand
-                    </span>
+            {settings.offerings.items.map((offer, oIdx) => (
+              <div key={offer.id || oIdx} className="col-lg-3 col-md-6 mb-4 d-flex">
+                <div
+                  className="card w-100 border-0 bg-light shadow-sm overflow-hidden flex-column justify-content-between transition-all"
+                  style={{
+                    borderRadius: '10px',
+                    borderTop: `4px solid ${offer.tagColor || (oIdx % 2 === 0 ? '#DFB163' : '#252531')}`,
+                    transition: 'transform 0.35s ease, box-shadow 0.35s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px)';
+                    e.currentTarget.style.boxShadow = '0 14px 28px rgba(0,0,0,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                  }}
+                >
+                  <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
+                    <img
+                      src={offer.image}
+                      alt={offer.title}
+                      className="w-100 h-100"
+                      style={{ objectFit: 'cover' }}
+                    />
+                    <div className="position-absolute" style={{ top: '12px', left: '12px', zIndex: 2 }}>
+                      <span
+                        className="badge px-2.5 py-1 font-weight-bold text-uppercase shadow-sm"
+                        style={{
+                          backgroundColor: offer.tagColor || '#DFB163',
+                          color: offer.tagColor === '#252531' ? '#ffffff' : '#181818',
+                          fontSize: '10px',
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        {offer.badge}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
-                  <div>
-                    <h5 className="font-weight-bold text-secondary mb-2" style={{ fontSize: '16px' }}>
-                      Modern & Classic Kitchens
-                    </h5>
-                    <p className="text-muted small mb-3" style={{ lineHeight: '1.6', fontSize: '13px' }}>
-                      Acrylic, PolyLac, HPL, and natural wood engineered with Austrian soft-close hardware and ergonomic storage workflows.
-                    </p>
-                  </div>
-                  <div className="pt-3 border-top">
-                    <Link
-                      href="/products?category=kitchens"
-                      className="text-primary font-weight-bold small d-inline-flex align-items-center text-decoration-none"
-                      style={{ letterSpacing: '0.5px' }}
-                    >
-                      Explore Kitchens <i className="fa fa-arrow-right ml-1"></i>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Offering Card 2: Smart Organization */}
-            <div className="col-lg-3 col-md-6 mb-4 d-flex">
-              <div
-                className="card w-100 border-0 bg-light shadow-sm overflow-hidden flex-column justify-content-between transition-all"
-                style={{
-                  borderRadius: '10px',
-                  borderTop: '4px solid #252531',
-                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 14px 28px rgba(0,0,0,0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                }}
-              >
-                <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
-                  <img
-                    src="/img/3.jpg"
-                    alt="Dressing Rooms"
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <div className="position-absolute" style={{ top: '12px', left: '12px', zIndex: 2 }}>
-                    <span
-                      className="badge px-2.5 py-1 font-weight-bold text-uppercase shadow-sm text-white"
-                      style={{ backgroundColor: '#252531', fontSize: '10px', letterSpacing: '1px' }}
-                    >
-                      Smart Organization
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
-                  <div>
-                    <h5 className="font-weight-bold text-secondary mb-2" style={{ fontSize: '16px' }}>
-                      Dressing Rooms (Walk-In)
-                    </h5>
-                    <p className="text-muted small mb-3" style={{ lineHeight: '1.6', fontSize: '13px' }}>
-                      Intelligent compartmentalization, tinted securit glass doors, and frosted LED profile illumination for apparel & luxury accessories.
-                    </p>
-                  </div>
-                  <div className="pt-3 border-top">
-                    <Link
-                      href="/products?category=dressing-rooms"
-                      className="text-primary font-weight-bold small d-inline-flex align-items-center text-decoration-none"
-                      style={{ letterSpacing: '0.5px' }}
-                    >
-                      Explore Dressing Rooms <i className="fa fa-arrow-right ml-1"></i>
-                    </Link>
+                  <div className="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                    <div>
+                      <h5 className="font-weight-bold text-secondary mb-2" style={{ fontSize: '16px' }}>
+                        {offer.title}
+                      </h5>
+                      <p className="text-muted small mb-3" style={{ lineHeight: '1.6', fontSize: '13px' }}>
+                        {offer.description}
+                      </p>
+                    </div>
+                    <div className="pt-3 border-top">
+                      <Link
+                        href={offer.link || '/products'}
+                        className="text-primary font-weight-bold small d-inline-flex align-items-center text-decoration-none"
+                        style={{ letterSpacing: '0.5px' }}
+                      >
+                        Explore <i className="fa fa-arrow-right ml-1"></i>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Offering Card 3: Modern Decor */}
-            <div className="col-lg-3 col-md-6 mb-4 d-flex">
-              <div
-                className="card w-100 border-0 bg-light shadow-sm overflow-hidden flex-column justify-content-between transition-all"
-                style={{
-                  borderRadius: '10px',
-                  borderTop: '4px solid #DFB163',
-                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 14px 28px rgba(0,0,0,0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                }}
-              >
-                <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
-                  <img
-                    src="/img/img-6.jpg"
-                    alt="TV Units & Decor"
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <div className="position-absolute" style={{ top: '12px', left: '12px', zIndex: 2 }}>
-                    <span
-                      className="badge px-2.5 py-1 font-weight-bold text-uppercase shadow-sm"
-                      style={{ backgroundColor: '#DFB163', color: '#181818', fontSize: '10px', letterSpacing: '1px' }}
-                    >
-                      Modern Decor
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
-                  <div>
-                    <h5 className="font-weight-bold text-secondary mb-2" style={{ fontSize: '16px' }}>
-                      TV Units & Feature Walls
-                    </h5>
-                    <p className="text-muted small mb-3" style={{ lineHeight: '1.6', fontSize: '13px' }}>
-                      UV marble alternative cladding, warm fluted wood panels, concealed cable conduits, and floating console storage.
-                    </p>
-                  </div>
-                  <div className="pt-3 border-top">
-                    <Link
-                      href="/products?category=living-rooms"
-                      className="text-primary font-weight-bold small d-inline-flex align-items-center text-decoration-none"
-                      style={{ letterSpacing: '0.5px' }}
-                    >
-                      Explore TV Units <i className="fa fa-arrow-right ml-1"></i>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Offering Card 4: Full Bespoke */}
-            <div className="col-lg-3 col-md-6 mb-4 d-flex">
-              <div
-                className="card w-100 border-0 bg-light shadow-sm overflow-hidden flex-column justify-content-between transition-all"
-                style={{
-                  borderRadius: '10px',
-                  borderTop: '4px solid #252531',
-                  transition: 'transform 0.35s ease, box-shadow 0.35s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 14px 28px rgba(0,0,0,0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                }}
-              >
-                <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
-                  <img
-                    src="/img/portfolio-4.jpg"
-                    alt="Custom Furniture & Fitouts"
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <div className="position-absolute" style={{ top: '12px', left: '12px', zIndex: 2 }}>
-                    <span
-                      className="badge px-2.5 py-1 font-weight-bold text-uppercase shadow-sm text-white"
-                      style={{ backgroundColor: '#252531', fontSize: '10px', letterSpacing: '1px' }}
-                    >
-                      Full Bespoke
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
-                  <div>
-                    <h5 className="font-weight-bold text-secondary mb-2" style={{ fontSize: '16px' }}>
-                      Custom Furniture & Fitouts
-                    </h5>
-                    <p className="text-muted small mb-3" style={{ lineHeight: '1.6', fontSize: '13px' }}>
-                      Comprehensive architectural woodwork, bespoke dining buffets, entrance consoles, and full interior manufacturing.
-                    </p>
-                  </div>
-                  <div className="pt-3 border-top">
-                    <Link
-                      href="/products?category=furniture"
-                      className="text-primary font-weight-bold small d-inline-flex align-items-center text-decoration-none"
-                      style={{ letterSpacing: '0.5px' }}
-                    >
-                      Explore Custom Fitouts <i className="fa fa-arrow-right ml-1"></i>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -611,61 +400,33 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
           <div className="row align-items-center">
             <div className="col-lg-7 pr-lg-5 mb-4 mb-lg-0">
               <h6 className="text-primary font-weight-normal text-uppercase mb-2" style={{ letterSpacing: '2px' }}>
-                Why Choose Us?
+                {settings.whyChooseUs.badge}
               </h6>
               <h2 className="mb-4 section-title font-weight-bold text-secondary">
-                40+ Years Experience In Furniture and kitchen design
+                {settings.whyChooseUs.title}
               </h2>
               <p className="mb-4 text-muted" style={{ lineHeight: '1.9' }}>
-                At Florence, we prioritize long-term durability and client peace of mind. Every project is executed strictly on schedule using certified materials with dedicated after-sales support.
+                {settings.whyChooseUs.description}
               </p>
 
               {/* Elevated Checklist */}
               <div className="row">
-                <div className="col-12 mb-3">
-                  <div className="d-flex align-items-start bg-white p-3 border">
-                    <div
-                      className="d-flex align-items-center justify-content-center bg-primary text-secondary mr-3 shrink-0"
-                      style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
-                    >
-                      <i className="fa fa-shield-alt"></i>
-                    </div>
-                    <div>
-                      <h6 className="font-weight-bold text-secondary mb-1">40+ Years Experience & Real 10-Year Warranty</h6>
-                      <p className="text-muted small m-0">Comprehensive coverage on wood boards, finishes, and movement hardware.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-12 mb-3">
-                  <div className="d-flex align-items-start bg-white p-3 border">
-                    <div
-                      className="d-flex align-items-center justify-content-center bg-primary text-secondary mr-3 shrink-0"
-                      style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
-                    >
-                      <i className="fa fa-cube"></i>
-                    </div>
-                    <div>
-                      <h6 className="font-weight-bold text-secondary mb-1">Best Interior 3D Design & Virtual Preview</h6>
-                      <p className="text-muted small m-0">Photorealistic rendering before manufacturing so you see your space in advance.</p>
+                {settings.whyChooseUs.features.map((feat, fIdx) => (
+                  <div key={fIdx} className="col-12 mb-3">
+                    <div className="d-flex align-items-start bg-white p-3 border">
+                      <div
+                        className="d-flex align-items-center justify-content-center bg-primary text-secondary mr-3 shrink-0"
+                        style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
+                      >
+                        <i className={fIdx === 0 ? 'fa fa-shield-alt' : fIdx === 1 ? 'fa fa-cube' : 'fa fa-smile'}></i>
+                      </div>
+                      <div>
+                        <h6 className="font-weight-bold text-secondary mb-1">{feat.title}</h6>
+                        <p className="text-muted small m-0">{feat.desc}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="col-12">
-                  <div className="d-flex align-items-start bg-white p-3 border">
-                    <div
-                      className="d-flex align-items-center justify-content-center bg-primary text-secondary mr-3 shrink-0"
-                      style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
-                    >
-                      <i className="fa fa-smile"></i>
-                    </div>
-                    <div>
-                      <h6 className="font-weight-bold text-secondary mb-1">100% Customer Satisfaction & Strict Punctuality</h6>
-                      <p className="text-muted small m-0">On-time delivery commitment backed by our long-standing industry reputation.</p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -680,7 +441,7 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
                 }}
               >
                 <video
-                  src="/video/VE Project 2-2.mp4"
+                  src={settings.whyChooseUs.videoUrl}
                   controls
                   className="w-100 h-100"
                   style={{ minHeight: '360px', objectFit: 'cover', display: 'block' }}
@@ -690,7 +451,7 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
                   style={{ borderColor: 'rgba(223, 177, 99, 0.3)' }}
                 >
                   <span className="small font-weight-bold text-primary">
-                    <i className="fa fa-play-circle mr-2"></i> Florence Factory & Showroom Tour
+                    <i className="fa fa-play-circle mr-2"></i> {settings.whyChooseUs.videoTitle}
                   </span>
                   <span className="badge badge-primary text-dark font-weight-bold px-2 py-1">HD</span>
                 </div>
@@ -961,93 +722,66 @@ export default function HomePageClient({ initialProducts }: HomePageClientProps)
             {/* Team Cards */}
             <div className="col-md-8 p-0 pl-md-4">
               <div className="row">
-                {/* Member 1: Eng. Mohamed Atef */}
-                <div className="col-sm-6 mb-4 mb-sm-0">
-                  <div className="team d-flex flex-column text-center border shadow-sm bg-white h-100">
-                    <div className="position-relative overflow-hidden" style={{ height: '280px' }}>
-                      <img
-                        className="w-100 h-100"
-                        src="/img/prof.jpg"
-                        alt="eng-mohamed atef"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <div className="team-social d-flex align-items-center justify-content-center w-100 h-100 position-absolute">
-                        <a
-                          className="btn btn-outline-primary text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
-                          style={{ width: '40px', height: '40px', borderRadius: '0' }}
-                          href="https://www.facebook.com/Florencekitchenandfurniture"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Facebook"
-                        >
-                          <i className="fab fa-facebook-f"></i>
-                        </a>
-                        <a
-                          className="btn btn-outline-primary text-center px-0 d-inline-flex align-items-center justify-content-center"
-                          style={{ width: '40px', height: '40px', borderRadius: '0' }}
-                          href="https://wa.me/201065772456"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="WhatsApp"
-                        >
-                          <i className="fab fa-whatsapp"></i>
-                        </a>
+                {team.map((member, mIdx) => (
+                  <div key={member.id || mIdx} className="col-sm-6 mb-4 mb-sm-0">
+                    <div className="team d-flex flex-column text-center border shadow-sm bg-white h-100">
+                      <div className="position-relative overflow-hidden" style={{ height: '280px' }}>
+                        <img
+                          className="w-100 h-100"
+                          src={member.image}
+                          alt={member.name}
+                          style={{ objectFit: 'cover' }}
+                        />
+                        <div className="team-social d-flex align-items-center justify-content-center w-100 h-100 position-absolute">
+                          {member.facebook && (
+                            <a
+                              className="btn btn-outline-primary text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                              style={{ width: '40px', height: '40px', borderRadius: '0' }}
+                              href={member.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="Facebook"
+                            >
+                              <i className="fab fa-facebook-f"></i>
+                            </a>
+                          )}
+                          {member.linkedin && (
+                            <a
+                              className="btn btn-outline-primary text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
+                              style={{ width: '40px', height: '40px', borderRadius: '0' }}
+                              href={member.linkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="LinkedIn"
+                            >
+                              <i className="fab fa-linkedin-in"></i>
+                            </a>
+                          )}
+                          {member.whatsapp && (
+                            <a
+                              className="btn btn-outline-primary text-center px-0 d-inline-flex align-items-center justify-content-center"
+                              style={{ width: '40px', height: '40px', borderRadius: '0' }}
+                              href={member.whatsapp.startsWith('http') ? member.whatsapp : `https://wa.me/${member.whatsapp}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="WhatsApp"
+                            >
+                              <i className="fab fa-whatsapp"></i>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <div className="d-flex flex-column bg-secondary text-center py-3 px-2">
+                        <h5 className="text-white font-weight-bold mb-1" style={{ letterSpacing: '0.5px' }}>
+                          {member.name}
+                        </h5>
+                        <span className="text-primary small font-weight-bold text-uppercase">
+                          {member.role}
+                        </span>
                       </div>
                     </div>
-                    <div className="d-flex flex-column bg-secondary text-center py-3 px-2">
-                      <h5 className="text-white font-weight-bold mb-1" style={{ letterSpacing: '0.5px' }}>
-                        Eng. Mohamed Atef
-                      </h5>
-                      <span className="text-primary small font-weight-bold text-uppercase">
-                        Owner & General Manager
-                      </span>
-                    </div>
                   </div>
-                </div>
-
-                {/* Member 2: Hassan Samhan */}
-                <div className="col-sm-6">
-                  <div className="team d-flex flex-column text-center border shadow-sm bg-white h-100">
-                    <div className="position-relative overflow-hidden" style={{ height: '280px' }}>
-                      <img
-                        className="w-100 h-100"
-                        src="/img/prof.jpg"
-                        alt="hassan samhan"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <div className="team-social d-flex align-items-center justify-content-center w-100 h-100 position-absolute">
-                        <a
-                          className="btn btn-outline-primary text-center mr-2 px-0 d-inline-flex align-items-center justify-content-center"
-                          style={{ width: '40px', height: '40px', borderRadius: '0' }}
-                          href="https://www.linkedin.com/in/hassan-samhan-194889247/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="LinkedIn"
-                        >
-                          <i className="fab fa-linkedin-in"></i>
-                        </a>
-                        <a
-                          className="btn btn-outline-primary text-center px-0 d-inline-flex align-items-center justify-content-center"
-                          style={{ width: '40px', height: '40px', borderRadius: '0' }}
-                          href="https://wa.me/201065772456"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="WhatsApp"
-                        >
-                          <i className="fab fa-whatsapp"></i>
-                        </a>
-                      </div>
-                    </div>
-                    <div className="d-flex flex-column bg-secondary text-center py-3 px-2">
-                      <h5 className="text-white font-weight-bold mb-1" style={{ letterSpacing: '0.5px' }}>
-                        Hassan Samhan
-                      </h5>
-                      <span className="text-primary small font-weight-bold text-uppercase">
-                        Sales & Design Consultant
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

@@ -2,16 +2,22 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import { getSiteSettings } from '@/lib/site-settings-service';
+
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Our Services | florence-kitchen',
   description: 'Awesome Interior Designing Services For Your Home - Kitchens, Dressing Rooms & Furniture.',
 };
 
-export default function ServicePage() {
+export default async function ServicePage() {
+  const settings = await getSiteSettings();
+
   return (
     <div className="bg-white min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar settings={settings} />
 
       {/* Page Header Start */}
       <div className="container-fluid bg-secondary py-5">
@@ -43,7 +49,7 @@ export default function ServicePage() {
 
       {/* Services Start */}
       <main className="container-fluid py-5 flex-grow">
-        <div className="container py-5">
+        <div className="container py-4">
           <div className="row">
             <div className="col-lg-6 pr-lg-5 mb-5 mb-lg-0">
               <h6 className="text-primary font-weight-normal text-uppercase mb-3">
@@ -57,7 +63,7 @@ export default function ServicePage() {
               </p>
               <div className="mt-4">
                 <a
-                  href="https://wa.me/201065772456"
+                  href={`https://wa.me/${settings.contact.whatsapp}?text=Hello%20Florence%2C%20I%20would%20like%20to%20book%20a%20free%20consultation.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-primary py-3 px-4 font-weight-bold"
@@ -112,7 +118,8 @@ export default function ServicePage() {
       </main>
       {/* Services End */}
 
-      <Footer />
+      <Footer settings={settings} />
+      <WhatsAppButton whatsappNumber={settings.contact.whatsapp} />
     </div>
   );
 }

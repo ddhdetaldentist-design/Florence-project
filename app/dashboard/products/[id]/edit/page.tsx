@@ -10,7 +10,7 @@ import {
   ArrowLeft, 
   Upload, 
   X, 
-  Sparkles, 
+  Wrench, 
   Check, 
   AlertCircle, 
   Layers,
@@ -370,7 +370,7 @@ export default function EditProductPage() {
         {/* Section 3: Technical Specifications */}
         <div className="bg-[#181822] p-6 rounded-2xl border border-zinc-800 space-y-4">
           <h2 className="text-sm font-bold text-white flex items-center gap-2 pb-2 border-b border-zinc-800">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <Wrench className="w-4 h-4 text-primary" />
             <span>Technical Specifications</span>
           </h2>
 

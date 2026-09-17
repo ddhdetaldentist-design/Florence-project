@@ -3,8 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { SiteSettings } from '@/types';
+import { DEFAULT_SITE_SETTINGS } from '@/lib/site-settings-service';
 
-export default function Navbar() {
+export default function Navbar({ settings }: { settings?: SiteSettings }) {
+  const currentSettings = settings || DEFAULT_SITE_SETTINGS;
+  const { contact, social } = currentSettings;
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -51,39 +55,49 @@ export default function Navbar() {
             </div>
             <div className="col-md-6 text-center text-md-right">
               <div className="d-inline-flex align-items-center">
-                <a
-                  className="text-white px-2 hover-text-primary"
-                  href="https://www.facebook.com/Florencekitchenandfurniture"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                >
-                  <i className="fab fa-facebook-f"></i>
-                </a>
-                <a className="text-white px-2 hover-text-primary" href="#" aria-label="Twitter">
-                  <i className="fab fa-twitter"></i>
-                </a>
-                <a
-                  className="text-white px-2 hover-text-primary"
-                  href="https://www.linkedin.com/in/hassan-samhan-194889247/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                >
-                  <i className="fab fa-linkedin-in"></i>
-                </a>
-                <a
-                  className="text-white px-2 hover-text-primary"
-                  href="https://www.instagram.com/florence_new_2020/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                >
-                  <i className="fab fa-instagram"></i>
-                </a>
-                <a className="text-white pl-2 hover-text-primary" href="#" aria-label="YouTube">
-                  <i className="fab fa-youtube"></i>
-                </a>
+                {social.facebook && (
+                  <a
+                    className="text-white px-2 hover-text-primary"
+                    href={social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                  >
+                    <i className="fab fa-facebook-f"></i>
+                  </a>
+                )}
+                {social.twitter && (
+                  <a className="text-white px-2 hover-text-primary" href={social.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                    <i className="fab fa-twitter"></i>
+                  </a>
+                )}
+                {social.linkedin && (
+                  <a
+                    className="text-white px-2 hover-text-primary"
+                    href={social.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                  >
+                    <i className="fab fa-linkedin-in"></i>
+                  </a>
+                )}
+                {social.instagram && (
+                  <a
+                    className="text-white px-2 hover-text-primary"
+                    href={social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <i className="fab fa-instagram"></i>
+                  </a>
+                )}
+                {social.youtube && social.youtube !== '#' && (
+                  <a className="text-white pl-2 hover-text-primary" href={social.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                    <i className="fab fa-youtube"></i>
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -221,23 +235,6 @@ export default function Navbar() {
                   Contact
                 </Link>
               </div>
-
-              {/* Dashboard Button */}
-              <Link
-                href="/dashboard"
-                className="btn btn-primary ml-4 px-4 py-2 font-weight-bold d-inline-flex align-items-center shadow-sm"
-                style={{
-                  borderRadius: '0',
-                  color: '#181818',
-                  textDecoration: 'none',
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 4px 15px rgba(223, 177, 99, 0.35)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <i className="fa fa-tachometer-alt mr-2 text-dark"></i>
-                <span>Dashboard</span>
-              </Link>
             </div>
           </nav>
 
@@ -280,16 +277,6 @@ export default function Navbar() {
                 >
                   Contact
                 </Link>
-                <div className="pt-3 border-top border-secondary mt-2">
-                  <Link
-                    href="/dashboard"
-                    className="btn btn-primary btn-block font-weight-bold py-2 text-center text-dark"
-                    style={{ borderRadius: '0' }}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <i className="fa fa-tachometer-alt mr-2"></i> Dashboard
-                  </Link>
-                </div>
               </div>
             </div>
           )}
@@ -307,7 +294,7 @@ export default function Navbar() {
                 <div className="d-flex flex-column">
                   <h6 className="font-weight-bold mb-1 text-secondary">Our Office</h6>
                   <p className="m-0 text-muted small">
-                    Obour City - 9th District - Qatar Al Nada St.
+                    {contact.address}
                   </p>
                 </div>
               </div>
@@ -317,8 +304,8 @@ export default function Navbar() {
                 <h1 className="flaticon-email font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '38px' }}></h1>
                 <div className="d-flex flex-column">
                   <h6 className="font-weight-bold mb-1 text-secondary">Email Us</h6>
-                  <a href="mailto:florencenew2020@gmail.com" className="m-0 text-muted small" style={{ textDecoration: 'none' }}>
-                    florencenew2020@gmail.com
+                  <a href={`mailto:${contact.email}`} className="m-0 text-muted small" style={{ textDecoration: 'none' }}>
+                    {contact.email}
                   </a>
                 </div>
               </div>
@@ -328,8 +315,8 @@ export default function Navbar() {
                 <h1 className="flaticon-telephone font-weight-normal text-primary m-0 mr-3" style={{ fontSize: '38px' }}></h1>
                 <div className="d-flex flex-column">
                   <h6 className="font-weight-bold mb-1 text-secondary">Call Us</h6>
-                  <a href="tel:01065772456" className="m-0 text-primary font-weight-bold" style={{ textDecoration: 'none' }}>
-                    0106 577 2456
+                  <a href={`tel:${contact.phone}`} className="m-0 text-primary font-weight-bold" style={{ textDecoration: 'none' }}>
+                    {contact.phoneDisplay || contact.phone}
                   </a>
                 </div>
               </div>

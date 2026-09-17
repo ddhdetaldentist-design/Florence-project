@@ -2,8 +2,52 @@ import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Product, ProductFormData, Inquiry } from '@/types';
 import { INITIAL_PRODUCTS } from '@/lib/mock-data';
 
-// In-memory fallback store for when Supabase is not yet hooked up or local demoing
+const STORAGE_KEY = 'florence_local_products_v2';
+
+function isSchemaOrTableMissing(msg?: string): boolean {
+  if (!msg) return false;
+  const lower = msg.toLowerCase();
+  return (
+    lower.includes('schema cache') ||
+    lower.includes('could not find the table') ||
+    (lower.includes('relation') && lower.includes('does not exist')) ||
+    lower.includes('pgrst205') ||
+    lower.includes('pgrst200') ||
+    lower.includes('42p01')
+  );
+}
+
+// In-memory fallback store with browser localStorage synchronization
 let localProductsStore: Product[] = [...INITIAL_PRODUCTS];
+
+function getLocalProductsStore(): Product[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localProductsStore = parsed;
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed reading products from localStorage', e);
+    }
+  }
+  return localProductsStore;
+}
+
+function saveLocalProductsStore(items: Product[]) {
+  localProductsStore = items;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {
+      console.warn('Failed writing products to localStorage', e);
+    }
+  }
+}
 
 export async function getProducts(options?: {
   category?: string;
@@ -46,7 +90,7 @@ export async function getProducts(options?: {
   }
 
   // Fallback to local data
-  let result = [...localProductsStore];
+  let result = [...getLocalProductsStore()];
 
   if (options?.status && options.status !== 'all') {
     result = result.filter((p) => p.status === options.status);
@@ -92,7 +136,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     }
   }
 
-  const found = localProductsStore.find((p) => p.slug === slug);
+  const found = getLocalProductsStore().find((p) => p.slug === slug);
   return found || null;
 }
 
@@ -114,7 +158,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     }
   }
 
-  const found = localProductsStore.find((p) => p.id === id);
+  const found = getLocalProductsStore().find((p) => p.id === id);
   return found || null;
 }
 
@@ -136,16 +180,31 @@ export async function createProduct(productData: ProductFormData): Promise<{ pro
         .single();
 
       if (error) {
+        if (isSchemaOrTableMissing(error.message)) {
+          console.warn('Supabase table missing, saving locally:', error.message);
+          const current = getLocalProductsStore();
+          const updated = [newProduct, ...current];
+          saveLocalProductsStore(updated);
+          return { product: newProduct, error: null };
+        }
         return { product: null, error: error.message };
       }
       return { product: data as Product, error: null };
     } catch (err: any) {
+      if (isSchemaOrTableMissing(err?.message)) {
+        const current = getLocalProductsStore();
+        const updated = [newProduct, ...current];
+        saveLocalProductsStore(updated);
+        return { product: newProduct, error: null };
+      }
       return { product: null, error: err.message || 'Database error' };
     }
   }
 
   // Local fallback insertion
-  localProductsStore = [newProduct, ...localProductsStore];
+  const current = getLocalProductsStore();
+  const updated = [newProduct, ...current];
+  saveLocalProductsStore(updated);
   return { product: newProduct, error: null };
 }
 
@@ -164,25 +223,37 @@ export async function updateProduct(id: string, productData: Partial<ProductForm
         .single();
 
       if (error) {
+        if (isSchemaOrTableMissing(error.message)) {
+          console.warn('Supabase table missing, updating locally:', error.message);
+          return updateLocalFallback(id, productData);
+        }
         return { product: null, error: error.message };
       }
       return { product: data as Product, error: null };
     } catch (err: any) {
+      if (isSchemaOrTableMissing(err?.message)) {
+        return updateLocalFallback(id, productData);
+      }
       return { product: null, error: err.message || 'Database error' };
     }
   }
 
-  // Local fallback update
-  const index = localProductsStore.findIndex((p) => p.id === id);
+  return updateLocalFallback(id, productData);
+}
+
+function updateLocalFallback(id: string, productData: Partial<ProductFormData>): { product: Product | null; error: string | null } {
+  const current = getLocalProductsStore();
+  const index = current.findIndex((p) => p.id === id);
   if (index !== -1) {
-    localProductsStore[index] = {
-      ...localProductsStore[index],
+    const updatedItem = {
+      ...current[index],
       ...productData,
       updated_at: new Date().toISOString(),
     };
-    return { product: localProductsStore[index], error: null };
+    current[index] = updatedItem;
+    saveLocalProductsStore([...current]);
+    return { product: updatedItem, error: null };
   }
-
   return { product: null, error: 'Product not found' };
 }
 
@@ -192,24 +263,57 @@ export async function deleteProduct(id: string): Promise<{ success: boolean; err
       const supabase = createClient();
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) {
+        if (isSchemaOrTableMissing(error.message)) {
+          console.warn('Supabase table missing, deleting locally:', error.message);
+          return deleteLocalFallback(id);
+        }
         return { success: false, error: error.message };
       }
       return { success: true, error: null };
     } catch (err: any) {
+      if (isSchemaOrTableMissing(err?.message)) {
+        return deleteLocalFallback(id);
+      }
       return { success: false, error: err.message || 'Database error' };
     }
   }
 
-  // Local fallback deletion
-  localProductsStore = localProductsStore.filter((p) => p.id !== id);
+  return deleteLocalFallback(id);
+}
+
+function deleteLocalFallback(id: string): { success: boolean; error: string | null } {
+  const current = getLocalProductsStore();
+  const filtered = current.filter((p) => p.id !== id);
+  saveLocalProductsStore(filtered);
   return { success: true, error: null };
 }
 
 export async function uploadProductImage(file: File): Promise<{ url: string | null; error: string | null }> {
+  // 1. Try server-side API upload with service role key (guarantees storage permissions)
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.url) {
+        return { url: data.url, error: null };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('API upload failed, trying direct browser upload', apiErr);
+  }
+
+  // 2. Direct browser upload with Supabase client
   if (isSupabaseConfigured()) {
     try {
       const supabase = createClient();
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
@@ -217,18 +321,16 @@ export async function uploadProductImage(file: File): Promise<{ url: string | nu
         .from('product-images')
         .upload(filePath, file);
 
-      if (uploadError) {
-        return { url: null, error: uploadError.message };
+      if (!uploadError) {
+        const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+        return { url: data.publicUrl, error: null };
       }
-
-      const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
-      return { url: data.publicUrl, error: null };
     } catch (err: any) {
-      return { url: null, error: err.message || 'Storage upload failed' };
+      console.warn('Direct Supabase upload error:', err);
     }
   }
 
-  // Fallback: create an object URL or base64
+  // 3. Fallback: Data URL
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => {
